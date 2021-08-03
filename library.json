@@ -55,7 +55,8 @@
     },
     {
         "name": "SimpleList",
-        "platforms": "*"
+        "version": "https://github.com/spacehuhn/SimpleList",
+        "platforms": ["espressif8266", "espressif32"]
     }
   ],
   "platforms": [
