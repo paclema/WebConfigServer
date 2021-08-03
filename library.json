@@ -55,7 +55,7 @@
     },
     {
         "name": "SimpleList",
-        "platforms": ["espressif8266", "espressif32"]
+        "platforms": "*"
     }
   ],
   "platforms": [
