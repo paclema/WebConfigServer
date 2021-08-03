@@ -20,10 +20,43 @@
   "dependencies": 
   [
     {
-      "owner": "me-no-dev",
-      "name": "AsyncTCP",
-      "version": "^1.1.1",
-      "platforms": "espressif32"
+      "owner": "bblanchon",
+      "name": "ArduinoJson",
+      "version": "^6"
+    },
+    {
+        "owner": "me-no-dev",
+        "name": "AsyncTCP",
+        "version": "^1.2.2",
+        "platforms": "espressif32"
+    },
+    {
+        "owner": "me-no-dev",
+        "name": "ESP Async WebServer",
+        "version": "^1.2.3",
+        "platforms": ["espressif8266", "espressif32"]
+    },
+    {
+        "owner": "me-no-dev",
+        "name": "ESPAsyncTCP",
+        "version": "^1.2.2",
+        "platforms": "espressif8266"
+    },
+    {
+        "name": "ESP8266WebServer",
+        "version": "^1.0",
+        "platforms": "espressif8266"
+    },
+    {
+        "owner": "Links2004",
+        "name": "WebSockets",
+        "version": "^2.3.2",
+        "platforms": ["espressif8266", "espressif32"]
+    },
+    {
+        "owner": "spacehuhn",
+        "name": "SimpleList",
+        "platforms": ["espressif8266", "espressif32"]
     }
   ],
   "platforms": [
