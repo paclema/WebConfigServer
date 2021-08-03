@@ -1,0 +1,441 @@
+<!-- <p>config-tabs works!</p> -->
+<nb-card>
+<div class="container-fluid">
+<ng-container *ngIf="errorMsg"><div class="alert alert-danger" role="alert">{{errorMsg}}</div></ng-container>
+
+<!-- Reactive Form with configTabsForm property -->
+<!-- <hr /> -->
+<form [formGroup]="configTabsForm">
+<!-- <p>{{configTabsForm.value | json}} </p> -->
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" *ngFor="let tabname of configTabsForm.controls | keyvalue: returnZero ; first as isFirst; index as index">
+    <!-- Key: <b>{{tabname.key}}</b> and Value: <b>{{tabname.value}}</b> -->
+    <!-- <h2>{{tabname.key+ "-tab"}} </h2> -->
+
+    <ng-container *ngIf="isFirst; then thenBlock; else elseBlock"></ng-container>
+    <ng-template #thenBlock>
+      <a class="nav-link active" id='{{tabname.key+ "-tab"}}' data-toggle="tab" href='{{"#"+tabname.key}}' role="tab" aria-controls={{tabname.key}} aria-selected="true" aria-expanded="true">
+        {{tabname.key.charAt(0).toUpperCase() + tabname.key.slice(1)}}
+      </a>
+    </ng-template>
+    <ng-template #elseBlock>
+      <a class="nav-link" id='{{tabname.key+ "-tab"}}' data-toggle="tab" href='{{"#"+tabname.key}}' role="tab" aria-controls={{tabname.key}} aria-selected="false" aria-expanded="false">
+        {{tabname.key.charAt(0).toUpperCase() + tabname.key.slice(1)}}
+      </a>
+    </ng-template>
+
+  </li>
+</ul>
+
+
+<div class="tab-content" id="myTabContent">
+  <ng-container *ngFor="let tabname of configTabsForm.controls | keyvalue : returnZero; first as isFirst; index as index">
+    <!-- <form [formGroup]="configTabsForm.controls[index]"> -->
+    <ng-container *ngIf="isFirst; then thenBlock; else elseBlock"></ng-container>
+    <ng-template #thenBlock>
+      <div [formGroupName]="tabname.key" class="tab-pane fade show active" id="{{tabname.key}}" role="tabpanel" aria-labelledby='{{tabname.key+ "-tab"}}'>
+        <div class="panel-heading"><small>{{tabname.key.charAt(0).toUpperCase() + tabname.key.slice(1) + " configuration"}} </small></div>
+
+        <div id='{{tabname.key+"_body"}}' class="panel-body row">
+          <ng-container *ngFor="let configparam of configTabsForm.get(tabname.key).controls | keyvalue : returnZero; first as isFirst; index as index">
+            <!-- <h5>{{configparam.key + " :" + configparam.value}}</h5> -->
+            <!-- {{log(typeConfig(configparam.value.value))}} -->
+            <!-- {{typeConfig(configparam.value.value)}} -->
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'string'">
+              <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
+                <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                  [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                  name={{configparam.key}} type="{{configparam.key.includes('password') ? 'password' : 'text'}}"
+                  placeholder={{configparam.key}} class="form-control input-md" value={{configparam.value}}
+                  formControlName="{{configparam.key}}">
+                  <small class="text-danger" [class.d-none]="configparam.value.valid || configparam.value.untouched">{{configparam.key}} is required</small>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'number' ">
+              <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
+                <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                  [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                  name={{configparam.key}} type="{{configparam.key.includes('password') ? 'password' : 'text'}}"
+                  placeholder={{configparam.key}} class="form-control input-md" value={{configparam.value}}
+                  formControlName="{{configparam.key}}">
+                  <small class="text-danger" [class.d-none]="configparam.value.valid || configparam.value.untouched">{{configparam.key}} is required</small>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'boolean' ">
+              <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-check col-md-3">
+                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                  [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                  name={{configparam.key}} type="checkbox"
+                  placeholder={{configparam.key}} class="form-check-input input-md" value={{configparam.value}}
+                  formControlName="{{configparam.key}}">
+                  <label class="form-check-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'object' ">
+              <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
+                <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                  [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                  name={{configparam.key}} type="{{configparam.key.includes('password') ? 'password' : 'text'}}"
+                  placeholder={{configparam.key}} class="form-control input-md" value={{configparam.value}}
+                  formControlName="{{configparam.key}}">
+                  <small class="text-danger" [class.d-none]="configparam.value.valid || configparam.value.untouched">{{configparam.key}} is required</small>
+                </div>
+              </div>
+            </ng-container>
+
+          </ng-container>
+        </div>
+      </div>
+    </ng-template>
+    <ng-template #elseBlock>
+      <div formGroupName="{{tabname.key}}" class="tab-pane fade" id="{{tabname.key}}" role="tabpanel" aria-labelledby='{{tabname.key+ "-tab"}}'>
+        <div class="panel-heading"><small>{{tabname.key.charAt(0).toUpperCase() + tabname.key.slice(1) + " configuration"}} </small></div>
+        <div id='{{tabname.key+"_body"}}' class="panel-body row">
+
+          <ng-container *ngFor="let configparam of configTabsForm.get(tabname.key).controls | keyvalue : returnZero; first as isFirst; index as index">
+            <!-- <h5>{{configparam.key + " :" + configparam.value}}</h5> -->
+            <!-- {{log(typeConfig(configparam.value.value))}} -->
+            <!-- {{typeConfig(configparam.value.value)}} -->
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'string'">
+              <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
+                <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                  [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                  name={{configparam.key}} type="{{configparam.key.includes('password') ? 'password' : 'text'}}"
+                  placeholder={{configparam.key}} class="form-control input-md" value={{configparam.value}}
+                  formControlName="{{configparam.key}}">
+                  <small class="text-danger" [class.d-none]="configparam.value.valid || configparam.value.untouched">{{configparam.key}} is required</small>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'number' ">
+              <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
+                <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                  [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                  name={{configparam.key}} type="{{configparam.key.includes('password') ? 'password' : 'text'}}"
+                  placeholder={{configparam.key}} class="form-control input-md" value={{configparam.value}}
+                  formControlName="{{configparam.key}}">
+                  <small class="text-danger" [class.d-none]="configparam.value.valid || configparam.value.untouched">{{configparam.key}} is required</small>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'boolean' ">
+              <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-check col-md-3">
+                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                  [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                  name={{configparam.key}} type="checkbox"
+                  placeholder={{configparam.key}} class="form-check-input input-md" value={{configparam.value}}
+                  formControlName="{{configparam.key}}">
+                  <label class="form-check-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'array' ">
+              <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
+                <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                  [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                  name={{configparam.key}} type="{{configparam.key.includes('password') ? 'password' : 'text'}}"
+                  placeholder={{configparam.key}} class="form-control input-md" value={{configparam.value}}
+                  formControlName="{{configparam.key}}">
+                  <small class="text-danger" [class.d-none]="configparam.value.valid || configparam.value.untouched">{{configparam.key}} is required</small>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="typeConfig(configparam.value.value) == 'object' ">
+              <div formGroupName="{{configparam.key}}" id='{{configparam.key}}' class="form-group col-md-3">
+
+                <nb-card accent="info" status="basic">
+                  <!-- {{log(configTabsForm.get(tabname.key.configparam))}} -->
+                  <ng-container *ngFor="let nestedconfigparam of configTabsForm['controls'][tabname.key]['controls'][configparam.key]['controls'] | keyvalue : returnZero; first as isFirst; index as index">
+
+                    <ng-container *ngIf="isFirst; else elseBlock">
+                      <nb-card-header>
+                        <nb-toggle formControlName="{{nestedconfigparam.key}}" labelPosition="left">
+                          {{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}
+                        </nb-toggle>
+                      </nb-card-header>
+                    </ng-container>
+
+                    <ng-template #elseBlock>
+                        <!-- {{nestedconfigparam.key }}
+                        {{nestedconfigparam.value.value }} -->
+                        <nb-card-body>
+                        <label class="control-label font-weight-bold" for={{nestedconfigparam.key}}>{{nestedconfigparam.key.charAt(0).toUpperCase() + (nestedconfigparam.key.slice(1) | replaceUnderscore)}}</label>
+                         <div id='{{tabname.key + "_" + configparam.key + "_" + nestedconfigparam.key + "_input"}}' >
+                          <input  id='{{configparam.key + "_" + nestedconfigparam.key}}' [class.is-invalid]="nestedconfigparam.value.invalid && nestedconfigparam.value.touched"
+                          name={{nestedconfigparam.key}} type="{{nestedconfigparam.key.includes('password') ? 'password' : 'text'}}"
+                          placeholder={{nestedconfigparam.key}} class="form-control input-md" value="{{nestedconfigparam.value.value}}"
+                          formControlName="{{nestedconfigparam.key}}">
+                          <small class="text-danger" [class.d-none]="nestedconfigparam.value.valid || nestedconfigparam.value.untouched">{{nestedconfigparam.key}} is required</small>
+                        </div>
+                        </nb-card-body>
+                    </ng-template>
+
+                  </ng-container>
+                </nb-card>
+              </div>
+            </ng-container>
+
+
+          </ng-container>
+
+        </div>
+      </div>
+    </ng-template>
+  </ng-container>
+</div>
+
+
+<hr />
+<!-- <div>{{configTabsForm.value | json}} </div> -->
+
+<!-- Buttons -->
+<!-- <div class="container theme-showcase" role="main"> -->
+<!-- <div class="row"> -->
+<div id="buttons" class="float-right" style="margin-bottom: 20px; margin-right: 20px; float: right;">
+<!-- <div id="buttons" body class="panel-body"> -->
+  <div class="col-md-12">
+
+    <button [nbSpinner]="savingPOST" nbSpinnerStatus="success" (click)="saveConfigTabs()" [disabled]='!configTabsForm.valid || savingPOST' id="SaveConfig"
+    class="btn btn-primary ml-2" type="submit">
+    <ng-container *ngIf="savingPOST; else elseTemplate">
+      Saving...
+      <!-- <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> -->
+    </ng-container>
+    <ng-template #elseTemplate>
+      Save
+    </ng-template>
+    </button>
+    <button (click)="restartDevice()" [disabled]='!configTabsForm.valid' id="Restart"
+            class="btn btn-success ml-2" type="submit">Restart device</button>
+
+    <button (click)="loadConfigFile()" id="LoadConfig" class="btn btn-warning ml-2" type="submit">Load configs</button>
+    <button [nbPopover]="templateRef" nbPopoverPlacement="top" id="Factory" class="btn btn-danger ml-2">Factory defaults</button>
+    <ng-template #templateRef id="FactoryConfirm">
+        <button (click)="configFactoryDefaults()" class="btn btn-outline-danger btn-sm" type="submit">Confirm</button>
+    </ng-template>
+
+    <button (click)="gpioTest()" id="gpio_test" class="btn btn-info ml-2" type="submit">GPIO LED test</button>
+  </div>
+</div>
+
+<!-- Alerts -->
+<ng-container *ngIf="errorMsgPost"><div class="alert alert-danger fixed-bottom alert-dismissible fade show"
+    role="alert" style="width:50%; "><strong>Error: </strong>{{errorMsgPost}}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+</ng-container>
+
+<ng-container *ngIf="dataMsgPost"><div class="alert alert-success fixed-bottom alert-dismissible fade show"
+    role="alert" style="width:50%; "><strong>Msg: </strong>{{dataMsgPost.message}}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+</ng-container>
+
+
+</form>
+</div>
+
+
+
+
+
+<!-- Example Template Driven Form -->
+<div *ngIf="enableTutorial">
+<hr />
+<div class="container-fluid">
+  <h1>Test Template Driven Form:</h1>
+  <form #testForm="ngForm" *ngIf="(!submitted); else formSubmittedBlock" (ngSubmit)="onSubmit(testForm)" novalidate>
+
+    #testForm valid: {{ testForm.form.valid }}
+    <hr />
+    {{ testForm.value | json}}
+    <hr />
+    {{ testFormModel | json}}
+
+
+    <div ngModelGroup="tabConfigs">
+
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" required #name="ngModel" [class.is-invalid]="name.invalid && name.touched"
+        class="form-control" [(ngModel)]="testFormModel.userName" name="userName">
+        <!-- validating form with class binding: (not working!)-->
+        <!-- <small class="text-danger" [class.d-none]="name.valid && name.untouched">Name is required</small> -->
+        <!-- validating form using ngif: https://angular.io/guide/form-validation-->
+        <div *ngIf="name.errors && (name.invalid || name.touched)">
+          <small class="text-danger" *ngIf="name.errors.required">Name is required</small>
+        </div>
+        <!-- {{name.valid}} -->
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-control" [(ngModel)]="testFormModel.email" name="email">
+      </div>
+
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" #phone="ngModel" pattern="^\d{9}$" [class.is-invalid]="phone.invalid && phone.touched" required
+        class="form-control" [(ngModel)]="testFormModel.phone" name="phone">
+        <!-- validating form with class binding: (not working!)-->
+        <!-- <small class="text-danger" [class.d-none]="phone.valid && phone.untouched">Phone number is required and must be 10 digits</small> -->
+        <!-- validating form using ngif: https://angular.io/guide/form-validation-->
+        <div *ngIf="phone.errors && (phone.invalid || phone.touched)">
+          <small class="text-danger" *ngIf="phone.errors.required">Phone number is required</small>
+          <small class="text-danger" *ngIf="phone.errors.pattern">Phone number must be 10 digits and follow the pattern</small>
+        </div>
+        <!-- {{phone.valid}} -->
+      </div>
+
+      <div class="form-group">
+        <select (blur)="validateSleepMode(sleepMode.value)" (change)="validateSleepMode(sleepMode.value)" required
+        #sleepMode="ngModel" [class.is-invalid]="sleepModeHasError && sleepMode.touched"
+        class="custom-select" [(ngModel)]="testFormModel.sleepMode" name="sleepMode">
+          <option value="default">Sleep mode</option>
+          <option *ngFor="let mode of sleepModes">{{ mode }}</option>
+        </select>
+          <small *ngIf="sleepModeHasError && sleepMode.touched" class="text-danger">Please choose a sleep mode</small>
+      </div>
+
+      <div class="mb-3">
+        <label>Time preference</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="timePreference" value="morning" [(ngModel)]="testFormModel.timePreference">
+          <label class="form-check-label">Morning (9AM - 12AM)</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="timePreference" value="evening" [(ngModel)]="testFormModel.timePreference">
+          <label class="form-check-label">Evening (5PM - 8PM)</label>
+        </div>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="testFormModel.ota" name="ota">
+        <label class="form-check-label">OTA</label>
+      </div>
+
+      <button [disabled]="testForm.form.invalid || sleepModeHasError" class="btn btn-primary" type="submit">Submit form</button>
+      <ng-container *ngIf="errorMsgPost"><hr /><div class="alert alert-danger" role="alert">{{errorMsgPost}}</div></ng-container>
+    </div>
+
+
+  </form>
+  <ng-template #formSubmittedBlock>
+    <div *ngIf="dataMsgPost" class="alert alert-success alert-dismissible fade show" role="alert">
+      Test form successfully posted to the server: {{dataMsgPost.message}}
+    </div>
+  </ng-template>
+
+</div>
+
+
+<!-- Example Reactive Form -->
+<hr />
+<div class="container-fluid col-md-4">
+  <h1>Test Reactive Form:</h1>
+  <form [formGroup]="registrationForm" (ngSubmit)="onSubmitRF()">
+
+    <div class="form-group">
+      <label>Username</label>
+      <input [class.is-invalid]="userName.invalid &&
+                                  userName.touched"
+        formControlName="userName" type="text" class="form-control" >
+      <!-- <small [class.d-none]="registrationForm.get('userName').valid ||
+                              registrationForm.get('userName').untouched"
+       class="text-danger">Username is required</small> -->
+      <div *ngIf="userName.invalid &&
+                    userName.touched" >
+        <small *ngIf="userName.errors?.required" class="text-danger">Username is required</small>
+        <small *ngIf="userName.errors?.minlength" class="text-danger">Username must be at least 3 characters</small>
+        <small *ngIf="userName.errors?.forbiddenName" class="text-danger">
+          Username {{userName.errors?.forbiddenName.value}} not allowed</small>
+
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <button type="button" class="btn btn-secondary btn-sm m-2" (click)="addAlternativeEmails()">Add e-mail</button>
+      <input [class.is-invalid]="email.invalid && email.touched" formControlName="email" type="text" class="form-control" >
+      <small class="text-danger" [class.d-none]="email.valid || email.untouched"> Email is required</small>
+      <div formArrayName="alternateEmails" class="" *ngFor="let email of alternateEmails.controls; let i=index ">
+        <input type="text" class="form-control my-1" [formControlName]="i">
+      </div>
+    </div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" formControlName="subscribe">
+      <label class="form-check-label">
+        Send me promotional offers
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>Paswsword</label>
+      <input formControlName="password" type="password" class="form-control" >
+    </div>
+
+    <div class="form-group">
+      <label>Confirm Paswsword</label>
+      <input [class.is-invalid]="registrationForm.errors?.misMatch" formControlName="confirmPassword" type="password" class="form-control" >
+      <small *ngIf="registrationForm.errors?.misMatch" class="text-danger">Passwords do not match</small>
+    </div>
+
+    <div formGroupName="address">
+      <div class="form-group">
+        <label>City</label>
+        <input formControlName="city" type="text" class="form-control" >
+      </div>
+
+      <div class="form-group">
+        <label>State</label>
+        <input formControlName="state" type="text" class="form-control" >
+      </div>
+
+      <div class="form-group">
+        <label>Postal Code</label>
+        <input formControlName="postalCode" type="text" class="form-control" >
+      </div>
+    </div>
+
+    <div>{{registrationForm.value | json}}</div>
+    <button (click)="loadApiData()" class="btn btn-secondary" type="submit">Load API Data</button>
+    <button [disabled]='!registrationForm.valid' class="btn btn-primary ml-2" type="submit">Register</button>
+    <ng-container *ngIf="errorMsgPost"><hr /><div class="alert alert-danger" role="alert">{{errorMsgPost}}</div></ng-container>
+
+
+  </form>
+
+</div>
+</div>
+</nb-card>

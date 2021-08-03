@@ -1,0 +1,39 @@
+<nb-layout>
+  <nb-layout-header fixed>
+    <!-- Company Name -->
+    <!-- <title>IoT Button configuration</title> -->
+    <!-- <h1>IoT Button configuration</h1> -->
+    <div class="logo-container">
+      <a (click)="toggleSidebar()" href="#" class="sidebar-toggle">
+      <nb-icon icon="menu-2-outline"></nb-icon>
+      <a class="logo" href="#" (click)="navigateHome()">
+        <span>IoT Device Configuration</span>
+        <!-- <legend style="margin: 20px">IoT Button configuration</legend> -->
+      </a>
+      </a>
+    </div>
+
+  </nb-layout-header>
+
+  <nb-sidebar>
+    <!-- Sidebar Content -->
+    <nb-menu [items]="items"></nb-menu>
+  </nb-sidebar>
+
+  <nb-layout-column class="colored-column-basic">
+    <!-- Now app-config-tabs will be displayed within the router-outlet -->
+    <!-- <app-config-tabs></app-config-tabs> -->
+    <router-outlet></router-outlet>
+    <!-- Routed view goes here -->
+  </nb-layout-column>
+
+  <nb-layout-footer>
+    <!-- <legend>paclema 2020</legend> -->
+    <span class="created-by">
+      Created with ♥ by <b><a href="https://github.com/paclema" target="_blank">
+        paclema</a></b> 2021 - <b><a href="https://github.com/paclema/iot_button/releases"
+        target="_blank">v{{webappVersion}}</a></b>
+    </span>
+  </nb-layout-footer>
+
+</nb-layout>

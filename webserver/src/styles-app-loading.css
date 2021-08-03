@@ -1,0 +1,6 @@
+.app-loading .logo {
+	 width: 100px;
+	 height: 100px;
+	 background: url(./assets/chiplogo.png) center center no-repeat;
+	 background-size: 200px 200px;
+}

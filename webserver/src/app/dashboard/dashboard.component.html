@@ -1,0 +1,52 @@
+
+<div class="row">
+
+  <div class="col-xxxl-3 col-xxl-4 col-lg-4 col-md-6">
+    <nb-card>
+      <nb-card-header>Websockets comunication</nb-card-header>
+       <nb-card-body>
+        <nb-form-field class="test">
+        <input nbInput fullWidth style="font-weight: 400" placeholder="Object" [(ngModel)]="wsObject">
+        <input nbInput fullWidth style="font-weight: 400" placeholder="Value" [(ngModel)]="wsValue">
+        <button nbButton outline style="float: right;" status="primary" (click)="sendMessage()"><nb-icon icon="arrow-ios-upward"></nb-icon>Send</button>
+        <button nbButton outline style="float: right;" status="primary" (click)="sendMessageBroadcast()"><nb-icon icon="arrowhead-up"></nb-icon>Send Broadcast</button>
+      </nb-form-field>
+      </nb-card-body>
+  
+    </nb-card>
+  </div>
+
+  <div class="col-xxxl-3 col-xxl-4 col-lg-8 col-md-6">
+    <nb-card>
+      <nb-card-header>Websockets received</nb-card-header>
+      <ng-container *ngFor="let data of dashboardData | keyvalue : returnZero; first as isFirst; index as index">
+        <span class="col-md-10" style="white-space: nowrap"><strong >{{ data.key }}:</strong> {{ data.value }}</span>
+
+      </ng-container>
+    </nb-card>
+  </div>
+
+
+  <div class="col-xxxl-12 col-xxl-12 col-md-12">
+    <nb-card>
+      <nb-card-header>
+        Realt time data
+        <button nbButton outline status="primary" size="tiny" shape="round" (click)="hideAll()">{{!this.labelsHidden ? 'hide all' : 'show all'}}</button>
+      </nb-card-header>
+        <div style="display: block;">
+          <!-- <canvas baseChart width="600" height="600" -->
+          <canvas baseChart  height="80"
+                    [datasets]="lineChartData"
+                    [labels]="lineChartLabels"
+                    [options]="lineChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="lineChartLegend"
+                    [chartType]="lineChartType"
+                    [plugins]="lineChartPlugins"
+                    (chartHover)="chartHovered($event)"
+                    (chartClick)="chartClicked($event)"></canvas>
+        </div>
+    </nb-card>
+  </div>
+
+</div>
