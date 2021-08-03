@@ -1,0 +1,40 @@
+{
+  "name":"WebConfigServer",
+  "version": "0.1.0",
+  "description":"Web Server to configure easily class objects or variables using SPIFFS config.json and plot values into real time dashboard for ESP8266 and ESP32",
+  "keywords":"http, async, async-webserver, websocket, webserver, esp8266, esp32",
+  "authors": 
+  [
+    {
+      "name": "Pablo Clemente",
+      "maintainer": true,
+      "url":   "https://github.com/paclema",
+    }
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/paclema/WebConfigServer"
+  },
+  "frameworks": "arduino",
+  "dependencies": 
+  [
+    {
+      "owner": "me-no-dev",
+      "name": "AsyncTCP",
+      "version": "^1.1.1",
+      "platforms": "espressif32"
+    }
+  ],
+  "platforms": [
+    "atmelavr",
+    "espressif8266",
+    "espressif32"
+    ],
+  "examples": "examples/*/*/*.ino",
+  "export": {
+    "exclude": [
+        "docs"
+        ]
+    }
+}
