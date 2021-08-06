@@ -1163,6 +1163,32 @@ void WebConfigServer::loop(void){
   //   deepSleepHandler();
   // }
 
+
+  // NTP time example:
+  // time_t now = time(nullptr);
+  // timeval tv;
+  // gettimeofday(&tv, nullptr);
+  // timespec tp;
+  // clock_gettime(0, &tp);
+
+  // // time from boot
+  // Serial.print("Time from boot: ");
+  // Serial.print((uint32_t)tp.tv_sec);
+  // Serial.print("s / ");
+  // Serial.print((uint32_t)tp.tv_nsec);
+  // Serial.println("ns");
+  // // EPOCH+tz+dst
+  // Serial.print("gtod: ");
+  // Serial.print((uint32_t)tv.tv_sec);
+  // Serial.print("s / ");
+  // Serial.print((uint32_t)tv.tv_usec);
+  // Serial.println("us");
+
+  // Serial.print("timestamp:");
+  // Serial.print((uint32_t)now);
+  // Serial.print(" - ");
+  // Serial.println(ctime(&now));
+
 }
 
 
