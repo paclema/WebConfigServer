@@ -4,6 +4,15 @@
 WebConfigServer::WebConfigServer(void){
   // Serial.println("WebConfigServer loaded");
   config_status = CONFIG_NOT_LOADED;
+
+  #ifdef USE_ASYNC_WEBSERVER
+    server = new AsyncWebServer(80);
+  #elif defined(ESP32)
+    server = new WebServer(80);
+  #elif defined(ESP8266)
+    server = new ESP8266WebServer(80);
+  #endif
+
 }
 
 bool WebConfigServer::begin(void){
@@ -536,7 +545,7 @@ void WebConfigServer::updateGpio(AsyncWebServerRequest *request){
 
 }
 
-void WebConfigServer::configureServer(AsyncWebServer *server){
+void WebConfigServer::configureServer(){
 
   //list directory
   // server->serveStatic("/certs", SPIFFS, "/certs");
@@ -569,7 +578,7 @@ void WebConfigServer::configureServer(AsyncWebServer *server){
 
   AsyncCallbackJsonWebHandler* handlerSaveConfig = new AsyncCallbackJsonWebHandler(
       "/save_config",
-      [& ,server](AsyncWebServerRequest *request, JsonVariant &json) {
+      [& ,this](AsyncWebServerRequest *request, JsonVariant &json) {
     DynamicJsonDocument doc(CONFIG_JSON_SIZE);
     doc = json;
     String response;
@@ -613,7 +622,7 @@ void WebConfigServer::configureServer(AsyncWebServer *server){
   server->addHandler(handlerSaveConfig);
 
 
-  server->on("/restore_config", HTTP_POST, [& ,server](AsyncWebServerRequest *request){
+  server->on("/restore_config", HTTP_POST, [& ,this](AsyncWebServerRequest *request){
 
     // if (request->args() > 0){
     //   for (int i = 0; i < request->args(); i++ ) {
@@ -771,7 +780,7 @@ void WebConfigServer::updateGpio(WebServer *server){
 }
 
 
-void WebConfigServer::configureServer(WebServer *server){
+void WebConfigServer::configureServer(){
 
   // Create configuration file
   //saveConfigurationFile(CONFIG_FILE);
@@ -794,11 +803,11 @@ void WebConfigServer::configureServer(WebServer *server){
   // server->serveStatic("/", SPIFFS, "/");
 
 
-  server->on("/gpio", HTTP_POST, [& ,server](){
+  server->on("/gpio", HTTP_POST, [&, this](){
     updateGpio(server);
   });
 
-  server->on("/save_config", HTTP_POST, [& ,server](){
+  server->on("/save_config", HTTP_POST, [&, this](){
 
     DynamicJsonDocument doc(CONFIG_JSON_SIZE);
     deserializeJson(doc, server->arg("plain"));
@@ -828,7 +837,7 @@ void WebConfigServer::configureServer(WebServer *server){
   });
 
 
-  server->on("/restore_config", HTTP_POST, [& ,server](){
+  server->on("/restore_config", HTTP_POST, [&, this](){
     String response;
     if( ! server->hasArg("filename") || server->arg("filename") == NULL){
       response = "{\"message\": \"filename to restore not provided\"}";
@@ -850,7 +859,7 @@ void WebConfigServer::configureServer(WebServer *server){
   });
 
 
-  server->on("/restart", HTTP_POST, [& ,server](){
+  server->on("/restart", HTTP_POST, [&, this](){
     if( ! server->hasArg("restart") || server->arg("restart") == NULL){
       server->send(400, "text/plain", "400: Invalid Request");
     } else{
@@ -870,7 +879,7 @@ void WebConfigServer::configureServer(WebServer *server){
   });
 
   // Handle files also gziped:
-  server->onNotFound([& ,server]() {
+  server->onNotFound([&, this]() {
     // If the client requests any URI
     String path = server->uri();
     if (!handleFileRead(server, server->uri()))
@@ -965,7 +974,7 @@ void WebConfigServer::updateGpio(ESP8266WebServer *server){
 
 }
 
-void WebConfigServer::configureServer(ESP8266WebServer *server){
+void WebConfigServer::configureServer(){
 
   // Create configuration file
   //saveConfigurationFile(CONFIG_FILE);
@@ -988,11 +997,11 @@ void WebConfigServer::configureServer(ESP8266WebServer *server){
   // server->serveStatic("/", SPIFFS, "/");
 
 
-  server->on("/gpio", HTTP_POST, [& ,server](){
+  server->on("/gpio", HTTP_POST, [& ,this](){
     updateGpio(server);
   });
 
-  server->on("/save_config", HTTP_POST, [& ,server](){
+  server->on("/save_config", HTTP_POST, [& ,this](){
 
     DynamicJsonDocument doc(CONFIG_JSON_SIZE);
     deserializeJson(doc, server->arg("plain"));
@@ -1019,7 +1028,7 @@ void WebConfigServer::configureServer(ESP8266WebServer *server){
   });
 
 
-  server->on("/restore_config", HTTP_POST, [& ,server](){
+  server->on("/restore_config", HTTP_POST, [& ,this](){
     String response;
     if( ! server->hasArg("filename") || server->arg("filename") == NULL){
       response = "{\"message\": \"filename to restore not provided\"}";
@@ -1041,7 +1050,7 @@ void WebConfigServer::configureServer(ESP8266WebServer *server){
   });
 
 
-  server->on("/restart", HTTP_POST, [& ,server](){
+  server->on("/restart", HTTP_POST, [& ,this](){
     if( ! server->hasArg("restart") || server->arg("restart") == NULL){
       server->send(400, "text/plain", "400: Invalid Request");
     } else{
@@ -1062,7 +1071,7 @@ void WebConfigServer::configureServer(ESP8266WebServer *server){
   });
 
   // Handle files also gziped:
-  server->onNotFound([& ,server]() {
+  server->onNotFound([& ,this]() {
     // If the client requests any URI
     String path = server->uri();
     if (!handleFileRead(server, server->uri()))
@@ -1126,6 +1135,11 @@ String WebConfigServer::getContentType(String filename) {
 }
 
 void WebConfigServer::loop(void){
+
+  // Handle WebConfigServer not asyc web server:
+  #ifndef USE_ASYNC_WEBSERVER
+    server->handleClient();
+  #endif
 
   // Services loop:
   if (services.ota.isEnabled()) services.ota.handle();

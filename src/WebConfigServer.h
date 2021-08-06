@@ -30,7 +30,7 @@
 // #include <LinkedList.h>
 // Using AsyncWebServer LinkedList lib can not be used because there is a class
 // using the same name. For that reason, for now we use SimpleList until we fix
-// this using namespace for example.
+// this using namespace for example. Check PR: https://github.com/me-no-dev/ESPAsyncWebServer/pull/1029
 #include <SimpleList.h>
 #include "IWebConfig.h"
 
@@ -64,19 +64,24 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include "AsyncJson.h"          // To handle JSON post request using AsyncCallbackJsonWebHandler
+    #pragma message ( "WebConfig running AsyncWebServer for ESP32" )
   #else
     #include <WebServer.h>
+    #pragma message ( "WebConfig running NO Async WebServer for ESP32" )
   #endif
-
 #elif defined(ESP8266)
   #include <FS.h>
   #ifdef USE_ASYNC_WEBSERVER
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
     #include "AsyncJson.h"          // To handle JSON post request using AsyncCallbackJsonWebHandler
+    #pragma message ( "WebConfig running AsyncWebServer for ESP8266" )
   #else
     #include <ESP8266WebServer.h>
+    #pragma message ( "WebConfig running NO Async WebServer for ESP8266" )
   #endif
+#else
+  #error Only ESP32 or ESP8266 builds are supported
 #endif
 
 #include <ArduinoJson.h>
@@ -189,18 +194,8 @@ public:
 
 
   WebConfigServer(void);
-
-  #ifdef USE_ASYNC_WEBSERVER
-    void configureServer(AsyncWebServer *server);
-  #else
-    #ifdef ESP32
-      void configureServer(WebServer *server);
-    #elif defined(ESP8266)
-      void configureServer(ESP8266WebServer *server);
-    #endif
-  #endif
-
-  void handle(void);
+  
+  void configureServer(void);
   bool begin(void);
   void loop(void);
 
@@ -214,7 +209,19 @@ public:
 private:
 
   // LinkedList<IWebConfig*> configs = LinkedList<IWebConfig*>();
+  // LinkedList<IWebConfig*> configsServices = LinkedList<IWebConfig*>();
   SimpleList<IWebConfig*> configs = SimpleList<IWebConfig*>();
+  SimpleList<IWebConfig*> configsServices = SimpleList<IWebConfig*>();
+
+
+  #ifdef USE_ASYNC_WEBSERVER
+    AsyncWebServer * server;
+  #elif defined(ESP32)
+    WebServer * server;
+  #elif defined(ESP8266)
+    ESP8266WebServer * server;
+  #endif
+
 
 
   void addConfigService(IWebConfig* config, String nameObject);
@@ -236,14 +243,12 @@ private:
   #ifdef USE_ASYNC_WEBSERVER
     void updateGpio(AsyncWebServerRequest *request);
     bool handleFileRead(AsyncWebServerRequest *request, String path);
-  #else
-    #ifdef ESP32
-      void updateGpio(WebServer *server);
-      bool handleFileRead(WebServer *server, String path);
-    #elif defined(ESP8266)
-      void updateGpio(ESP8266WebServer *server);
-      bool handleFileRead(ESP8266WebServer *server, String path);
-    #endif
+  #elif defined(ESP32)
+    void updateGpio(WebServer *server);
+    bool handleFileRead(WebServer *server, String path);
+  #elif defined(ESP8266)
+    void updateGpio(ESP8266WebServer *server);
+    bool handleFileRead(ESP8266WebServer *server, String path);
   #endif
 
   String getContentType(String filename);
