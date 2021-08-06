@@ -58,6 +58,7 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
 #include <WebConfigWebSockets.h>
 
 
+// Web server
 #ifdef ESP32
   #include <SPIFFS.h>
   #ifdef USE_ASYNC_WEBSERVER
@@ -83,6 +84,30 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
 #else
   #error Only ESP32 or ESP8266 builds are supported
 #endif
+
+
+// WiFi & Network
+#ifdef ESP32
+  #include <WiFi.h>
+  #include <WiFiMulti.h>
+  #include <ESPmDNS.h>
+
+  #define PROTO_TCP 6
+  #define PROTO_UDP 17
+
+  #if !IP_NAPT
+    #error "IP_NAPT is not available with this configuration."
+  #else
+    #include "esp_wifi.h"
+    #include "lwip/lwip_napt.h"
+  #endif
+
+#elif defined(ESP8266)
+  #include <ESP8266WiFi.h>
+  #include <ESP8266WiFiMulti.h>
+  #include <ESP8266mDNS.h>
+#endif
+
 
 #include <ArduinoJson.h>
 
@@ -223,6 +248,21 @@ private:
   #endif
 
 
+  // WiFi
+  #ifdef ESP32
+    WiFiMulti wifiMulti;
+  #elif defined(ESP8266)
+    ESP8266WiFiMulti wifiMulti;
+  #endif
+
+  #if ESP32 && IP_NAPT
+    uint8_t AP_clients = 0;
+    uint8_t AP_clients_last = AP_clients;
+    unsigned long previousHandleAPMillis = 0;
+  #endif
+
+  unsigned long currentLoopMillis = 0;
+  
 
   void addConfigService(IWebConfig* config, String nameObject);
   void parseIWebConfig(const JsonDocument& doc);
@@ -250,6 +290,12 @@ private:
     void updateGpio(ESP8266WebServer *server);
     bool handleFileRead(ESP8266WebServer *server, String path);
   #endif
+
+  #if ESP32 && IP_NAPT
+    esp_err_t enableNAT(void);
+    void handleAPStations(void);
+  #endif
+  void networkRestart(void);
 
   String getContentType(String filename);
 
