@@ -220,7 +220,6 @@ public:
 
   WebConfigServer(void);
   
-  void configureServer(void);
   bool begin(void);
   void loop(void);
 
@@ -263,6 +262,7 @@ private:
 
   unsigned long currentLoopMillis = 0;
   
+  void configureServer(void);
 
   void addConfigService(IWebConfig* config, String nameObject);
   void parseIWebConfig(const JsonDocument& doc);

@@ -91,6 +91,9 @@ bool WebConfigServer::begin(void){
   // Restart the newtwork:
   WebConfigServer::networkRestart();
 
+  // Configure and start the server:
+  WebConfigServer::configureServer();
+
   return true;
 
 }
