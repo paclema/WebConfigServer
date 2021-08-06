@@ -8,6 +8,12 @@
 
 #include "IWebConfig.h"
 
+#ifdef ESP32
+  #include <SPIFFS.h>
+#elif defined(ESP8266)
+  #include <FS.h>
+#endif
+
 class WebConfigOTA: public IWebConfig{
 
 private:
