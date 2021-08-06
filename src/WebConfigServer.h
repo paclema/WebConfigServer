@@ -34,6 +34,30 @@
 #include <SimpleList.h>
 #include "IWebConfig.h"
 
+
+// WebConfigOTA
+#include "WebConfigOTA.h"
+
+// FTP server
+#include <ESP8266FtpServer.h>
+#include <FS.h>
+
+// NTP
+#include <time.h>                         // time() ctime()
+#include <sys/time.h>                     // struct timeval
+
+#ifdef ESP32
+  #define NTP_MIN_VALID_EPOCH 1620413406  // For example: May 7th, 2021
+#elif defined(ESP8266)
+  #include <coredecls.h>                  // settimeofday_cb()
+#endif
+
+extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
+
+// WebScokets
+#include <WebConfigWebSockets.h>
+
+
 #ifdef ESP32
   #include <SPIFFS.h>
   #ifdef USE_ASYNC_WEBSERVER
@@ -104,12 +128,8 @@ public:
     String user;
     String password;
   };
+  FtpServer ftpSrv;
 
-  struct WebSockets {
-    bool enabled;
-    int publish_time_ms;
-    int port;
-  };
 
   struct DeepSleep {
     bool enabled;
@@ -132,10 +152,21 @@ public:
     long gmtOffset_sec;
     int daylightOffset_sec;
   };
+  #if defined(ESP8266)
+    timeval cbtime;			// time set in callback
+    bool cbtime_set = false;
+
+    // Callback function to know when the time is synch with ntp server:
+    void time_is_set(void) {
+      gettimeofday(&cbtime, NULL);
+      cbtime_set = true;
+      Serial.println("------------------ settimeofday() was called ------------------");
+    }
+  #endif
   struct Services {
-    bool ota;
+    WebConfigOTA ota;
     FTP ftp;
-    WebSockets webSockets;
+    WebConfigWebSockets webSockets;
     DeepSleep deep_sleep;
     LightSleep light_sleep;
     NTP ntp;
@@ -171,10 +202,13 @@ public:
 
   void handle(void);
   bool begin(void);
+  void loop(void);
 
   String status(void) { return config_status;};
 
   void addConfig(IWebConfig* config, String nameObject);
+  void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
+
 
 
 private:
@@ -182,8 +216,13 @@ private:
   // LinkedList<IWebConfig*> configs = LinkedList<IWebConfig*>();
   SimpleList<IWebConfig*> configs = SimpleList<IWebConfig*>();
 
-  void parseIWebConfig(const JsonDocument& doc);
 
+  void addConfigService(IWebConfig* config, String nameObject);
+  void parseIWebConfig(const JsonDocument& doc);
+  void parseIWebConfigService(const JsonDocument& doc);
+
+  void enableServices(void);
+  
   String formatBytes(size_t bytes);
 
   bool saveWebConfigurationFile(const char *filename, const JsonDocument& doc);

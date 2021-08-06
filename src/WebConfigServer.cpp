@@ -8,6 +8,11 @@ WebConfigServer::WebConfigServer(void){
 
 bool WebConfigServer::begin(void){
 
+  // Setup internal configs:
+  WebConfigServer::addConfigService(&services.ota, "OTA");
+  WebConfigServer::addConfigService(&services.webSockets, "WebSockets");
+
+
   #ifdef ESP32
     if (!SPIFFS.begin(true)) {
       Serial.println("SPIFFS Mount failed");
@@ -60,6 +65,18 @@ bool WebConfigServer::begin(void){
   #endif
 
 
+  // Configure NTP if enabled before wifi restart:
+  if (services.ntp.enabled){
+    #ifdef ESP8266
+      // settimeofday_cb(time_is_set);
+      // settimeofday_cb(std::bind(&WebConfigServer::time_is_set, this));
+      settimeofday_cb([&]() {
+        WebConfigServer::time_is_set();
+      });
+    #endif
+    configTime(services.ntp.gmtOffset_sec, services.ntp.daylightOffset_sec, services.ntp.ntpServer.c_str());
+  }
+
   config_status = CONFIG_LOADED;
   return true;
 
@@ -83,7 +100,7 @@ String WebConfigServer::formatBytes(size_t bytes){
 // Saves the web configuration from a POST req to a file
 bool WebConfigServer::saveWebConfigurationFile(const char *filename, const JsonDocument& doc){
   // Delete existing file, otherwise the configuration is appended to the file
-  Serial.println(F("Saving webconfig file..."));
+  Serial.print(F("Saving WebConfig file... "));
   SPIFFS.remove(filename);
 
   // Open file for writing
@@ -102,6 +119,7 @@ bool WebConfigServer::saveWebConfigurationFile(const char *filename, const JsonD
 
   // Close the file
   file.close();
+  Serial.println(F("Saved!"));
   return true;
 }
 
@@ -152,16 +170,10 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
 
 
   // Services object:
-  // OTA
-  services.ota = doc["services"]["OTA"] | false;
   // FTP
   services.ftp.enabled = doc["services"]["FTP"]["enabled"] | false;
   services.ftp.user = doc["services"]["FTP"]["user"] | "admin";
   services.ftp.password = doc["services"]["FTP"]["password"] | "admin";
-  // WebSockets
-  services.webSockets.enabled = doc["services"]["WebSockets"]["enabled"] | false;
-  services.webSockets.publish_time_ms = doc["services"]["WebSockets"]["publish_time_ms"];
-  services.webSockets.port = doc["services"]["WebSockets"]["port"];
   // DeepSleep
   services.deep_sleep.enabled = doc["services"]["deep_sleep"]["enabled"] | false;
   services.deep_sleep.mode = doc["services"]["deep_sleep"]["mode"] | "WAKE_RF_DEFAULT";
@@ -206,6 +218,14 @@ void WebConfigServer::addConfig(IWebConfig* config, String nameObject){
 };
 
 
+void WebConfigServer::addConfigService(IWebConfig* config, String nameObject){
+  config->nameConfigObject = nameObject;
+  this->configsServices.add(config);
+  Serial.print("IWebConfig Object added for: ");
+  Serial.println(config->nameConfigObject);
+};
+
+
 void WebConfigServer::parseIWebConfig(const JsonDocument& doc){
   // Serial.print("List IWebConfig Objects size: ");
   // Serial.println(configs.size());
@@ -219,6 +239,100 @@ void WebConfigServer::parseIWebConfig(const JsonDocument& doc){
 
   }
 };
+
+
+void WebConfigServer::parseIWebConfigService(const JsonDocument& doc){
+  // Serial.print("List IWebConfig Objects size: ");
+  // Serial.println(configsServices.size());
+
+  IWebConfig *config ;
+  for(int i = 0; i < configsServices.size(); i++){
+    config = configsServices.get(i);
+    config->parseWebConfig(doc["services"][config->nameConfigObject]);
+    // Serial.print("IWebConfig Object parsed for: ");
+    // Serial.println(config->nameConfigObject);
+
+  }
+};
+
+
+void WebConfigServer::enableServices(void){
+  Serial.println("\n--- Services: ");
+
+  if (services.ota.isEnabled()){
+    services.ota.init();
+    Serial.println("   - OTA -> enabled");
+  } else Serial.println("   - OTA -> disabled");
+
+
+  if (services.ftp.enabled && services.ftp.user !=NULL && services.ftp.password !=NULL){
+    ftpSrv.begin(services.ftp.user,services.ftp.password);
+    Serial.println("   - FTP -> enabled");
+  } else Serial.println("   - FTP -> disabled");
+
+  if (services.webSockets.isEnabled()){
+    services.webSockets.init();
+    Serial.println("   - WebSockets -> enabled");
+  } else Serial.println("   - WebSockets -> disabled");
+
+  if (services.deep_sleep.enabled){
+    // We will enable it on the loop function
+    // Serial.println("   - Deep sleep -> configured");
+    Serial.print("   - Deep sleep -> enabled for ");
+    Serial.print(services.deep_sleep.sleep_time);
+    Serial.print("s after waitting ");
+    Serial.print(services.deep_sleep.sleep_delay);
+    Serial.println("s. Choose sleep_time: 0 for infinite sleeping");
+    Serial.println("     Do not forget to connect D0 to RST pin to auto-wake up! Or I will sleep forever");
+  } else Serial.println("   - Deep sleep -> disabled");
+
+
+  #ifdef ESP32
+    // TODO: enable sleep modes for ESP32 here
+
+  #elif defined(ESP8266)
+    if (services.light_sleep.enabled){
+      if (services.light_sleep.mode == "LIGHT_SLEEP_T")
+        wifi_set_sleep_type(LIGHT_SLEEP_T);
+      else if (services.light_sleep.mode == "NONE_SLEEP_T")
+        wifi_set_sleep_type(NONE_SLEEP_T);
+      else {
+        Serial.println("   - Light sleep -> mode not available");
+        return;
+      }
+      Serial.println("   - Light sleep -> enabled");
+    } else Serial.println("   - Light sleep -> disabled");
+  #endif
+
+  if (services.ntp.enabled){
+    configTime(services.ntp.gmtOffset_sec, services.ntp.daylightOffset_sec, services.ntp.ntpServer.c_str());
+
+    #ifdef ESP8266
+      // settimeofday_cb(time_is_set);
+      settimeofday_cb([&]() {
+        WebConfigServer::time_is_set();
+      });
+    #elif defined(ESP32)
+      Serial.print ("\t\tSynching Time over NTP ");
+      while((time(nullptr)) < NTP_MIN_VALID_EPOCH) {
+        // warning : no time out. May loop here forever
+        delay(20);
+        Serial.print(".");
+      }
+      Serial.println("");
+    #endif
+    
+    Serial.print("   - NTP -> enabled\n");
+    Serial.printf("          - Server: %s\n", services.ntp.ntpServer.c_str());
+    Serial.printf("          - GMT offset: %d\n", services.ntp.gmtOffset_sec);
+    Serial.printf("          - Day light offset: %d\n", services.ntp.daylightOffset_sec);
+  } else Serial.println("   - NTP -> disabled");
+
+
+
+  Serial.println("");
+
+}
 
 
 // Loads the configuration from a file
@@ -238,6 +352,9 @@ void WebConfigServer::loadConfigurationFile(const char *filename){
 
   // Parse file to Config struct object:
   WebConfigServer::parseConfig(doc);
+
+  // Parse file to WebConfig IWebConfig service objects:
+  WebConfigServer::parseIWebConfigService(doc);
 
   // Parse file to IWebConfig objects:
   WebConfigServer::parseIWebConfig(doc);
@@ -466,6 +583,8 @@ void WebConfigServer::configureServer(AsyncWebServer *server){
 
         // Parse file to Config struct object:
         WebConfigServer::parseConfig(doc);
+        // Parse file to WebConfig IWebConfig service objects:
+        WebConfigServer::parseIWebConfigService(doc);
         // Parse file to IWebConfig objects:
         WebConfigServer::parseIWebConfig(doc);
         // Save the config file with new configuration:
@@ -561,6 +680,9 @@ void WebConfigServer::configureServer(AsyncWebServer *server){
 
   server->begin();
   Serial.println ( "HTTP server started" );
+
+  // TODO: move this to reconnect future method:
+  WebConfigServer::enableServices();
 }
 
 
@@ -690,6 +812,9 @@ void WebConfigServer::configureServer(WebServer *server){
     // Parse file to Config struct object:
     WebConfigServer::parseConfig(doc);
 
+    // Parse file to WebConfig IWebConfig service objects:
+    WebConfigServer::parseIWebConfigService(doc);
+
     // Parse file to IWebConfig objects:
     WebConfigServer::parseIWebConfig(doc);
 
@@ -756,6 +881,9 @@ void WebConfigServer::configureServer(WebServer *server){
 
   server->begin();
   Serial.println ( "HTTP server started" );
+
+  // TODO: move this to reconnect future method:
+  WebConfigServer::enableServices();
 
 }
 
@@ -946,6 +1074,9 @@ void WebConfigServer::configureServer(ESP8266WebServer *server){
   server->begin();
   Serial.println ( "HTTP server started" );
 
+  // TODO: move this to reconnect future method:
+  WebConfigServer::enableServices();
+
 }
 
 bool WebConfigServer::handleFileRead(ESP8266WebServer *server, String path) {
@@ -994,6 +1125,14 @@ String WebConfigServer::getContentType(String filename) {
   return "text/plain";
 }
 
-void WebConfigServer::handle(void){
+void WebConfigServer::loop(void){
+
+  // Services loop:
+  if (services.ota.isEnabled()) services.ota.handle();
+  if (services.ftp.enabled) ftpSrv.handleFTP();
+  if (services.webSockets.isEnabled()) services.webSockets.handle();
+  // if (services.deep_sleep.enabled){
+  //   deepSleepHandler();
+  // }
 
 }
