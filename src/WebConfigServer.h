@@ -18,7 +18,6 @@
 #define DYNAMIC_JSON_DOCUMENT_SIZE CONFIG_JSON_SIZE   //  To redefine "AsyncJson.h" AsyncCallbackJsonWebHandler json doc max size
 #define MIN_HEAP_SIZE_FOR_SAVING_CONFIG 3000
 
-#define MQTT_TOPIC_MAX_SIZE_LIST 10
 #define JSON_MAX_SIZE_LIST 6
 
 #define CONFIG_LOADED "loaded"
@@ -34,6 +33,10 @@
 #include <SimpleList.h>
 #include "IWebConfig.h"
 
+
+// MQTT
+#include <PubSubClient.h>
+#include "WebConfigMQTT.h"
 
 // WebConfigOTA
 #include "WebConfigOTA.h"
@@ -136,22 +139,7 @@ public:
     bool enable_NAT;
   } network;
 
-  struct Mqtt {
-    bool enabled;
-    String server;
-    int port;
-    String id_name;
-    bool reconnect_mqtt;
-    bool enable_user_and_pass;
-    String user_name;
-    String user_password;
-    bool enable_certificates;
-    String ca_file;
-    String cert_file;
-    String key_file;
-    String pub_topic[MQTT_TOPIC_MAX_SIZE_LIST];
-    String sub_topic[MQTT_TOPIC_MAX_SIZE_LIST];
-  } mqtt;
+  WebConfigMQTT mqtt;
 
   struct FTP {
     bool enabled;
@@ -228,7 +216,7 @@ public:
   void addConfig(IWebConfig* config, String nameObject);
   void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
 
-
+  PubSubClient *getMQTTClient(void) { return mqtt.getMQTTClient(); }
 
 private:
 

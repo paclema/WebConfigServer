@@ -18,6 +18,7 @@ WebConfigServer::WebConfigServer(void){
 bool WebConfigServer::begin(void){
 
   // Setup internal configs:
+  WebConfigServer::addConfig(&mqtt, "mqtt");
   WebConfigServer::addConfigService(&services.ota, "OTA");
   WebConfigServer::addConfigService(&services.webSockets, "WebSockets");
 
@@ -94,6 +95,12 @@ bool WebConfigServer::begin(void){
   // Configure and start the server:
   WebConfigServer::configureServer();
 
+  // Setup MQTT:
+  if (mqtt.isEnabled()) {
+    mqtt.setup();
+    if (mqtt.getReconnect()) mqtt.reconnect();
+  }
+
   return true;
 
 }
@@ -164,25 +171,7 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
 
 
   // MQTT object:
-  mqtt.enabled = doc["mqtt"]["enabled"] | false;
-  mqtt.server = doc["mqtt"]["server"] | "server_address";
-  mqtt.port = doc["mqtt"]["port"] | 8888;
-  mqtt.id_name = doc["mqtt"]["id_name"] | "iotdevice";
-  mqtt.reconnect_mqtt = doc["mqtt"]["reconnect_mqtt"] | false;
-  mqtt.enable_user_and_pass = doc["mqtt"]["enable_user_and_pass"] | false;
-  mqtt.user_name = doc["mqtt"]["user_name"] | "user_name";
-  mqtt.user_password = doc["mqtt"]["user_password"] | "user_password";
-  mqtt.enable_certificates = doc["mqtt"]["enable_certificates"] | false;
-  mqtt.ca_file = doc["mqtt"]["ca_file"] | "certs/ca.crt";
-  mqtt.cert_file = doc["mqtt"]["cert_file"] | "certs/client.crt";
-  mqtt.key_file = doc["mqtt"]["key_file"] | "certs/client.key";
-  mqtt.ca_file = doc["mqtt"]["ca_file"] | "server_address";
-  for (unsigned int i = 0; i < doc["mqtt"]["pub_topic"].size(); i++) { //Iterate through results
-    // mqtt.pub_topic[i] = doc["mqtt"]["pub_topic"][i];  //Implicit cast
-    mqtt.pub_topic[i] = doc["mqtt"]["pub_topic"][i].as<String>(); //Explicit cast
-  }
-  for (unsigned int i = 0; i < doc["mqtt"]["sub_topic"].size(); i++)
-    mqtt.sub_topic[i] = doc["mqtt"]["sub_topic"][i].as<String>();
+  mqtt.setPublishTime(doc["device"]["publish_time_ms"]);
 
 
   // Services object:
@@ -402,13 +391,13 @@ void WebConfigServer::saveConfigurationFile(const char *filename){
   doc["network"]["ssid_name"] = network.ssid_name;
   doc["network"]["ssid_password"] = network.ssid_password;
 
-  // Network object:
-  doc["mqtt"]["server"] = mqtt.server;
-  doc["mqtt"]["port"] = mqtt.port;
+  // MQTT object:
+  // doc["mqtt"]["server"] = mqtt.server;
+  // doc["mqtt"]["port"] = mqtt.port;
 
   // Services object:
-  doc["services"]["FTP"] = mqtt.server;
-  doc["services"]["port"] = mqtt.port;
+  // doc["services"]["FTP"] = mqtt.server;
+  // doc["services"]["port"] = mqtt.port;
 
   // Serialize JSON to file
   if (serializeJson(doc, file) == 0) {
@@ -1157,6 +1146,12 @@ void WebConfigServer::loop(void){
   #ifndef USE_ASYNC_WEBSERVER
     server->handleClient();
   #endif
+
+  // Handle mqtt reconnection:
+  if (mqtt.isEnabled()) {
+    if (mqtt.getReconnect() && !mqtt.isConnected()) mqtt.reconnect();
+    mqtt.loop();
+  }
 
   // Services loop:
   if (services.ota.isEnabled()) services.ota.handle();
