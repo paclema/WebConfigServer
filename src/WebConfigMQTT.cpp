@@ -56,7 +56,7 @@ void WebConfigMQTT::reconnect() {
     if (!mqttClient.connected() && (mqttRetries <= mqttMaxRetries) ) {
       bool mqttConnected = false;
       Serial.print("Attempting MQTT connection... ");
-      String mqttWillTopic = "/" + id_name + "/connected";
+      String mqttWillTopic = base_topic_pub + "connected";
       uint8_t mqttWillQoS = 2;
       boolean mqttWillRetain = true;
       String mqttWillMessage = "false";
@@ -78,7 +78,6 @@ void WebConfigMQTT::reconnect() {
       if (mqttConnected) {
         Serial.println("connected");
         // Once connected, publish an announcement...
-        String base_topic_pub = "/" + id_name + "/";
         String topic_connected_pub = base_topic_pub + "connected";
         String msg_connected ="true";
         mqttClient.publish(topic_connected_pub.c_str(), msg_connected.c_str(), true);
@@ -120,9 +119,7 @@ void WebConfigMQTT::loop(void){
     previousMQTTPublishMillis = currentLoopMillis;
     // Here starts the MQTT publish loop configured:
 
-    String base_topic_pub = "/" + id_name + "/";
     String topic_pub = base_topic_pub + "data";
-    // String msg_pub ="{\"angle\":35, \"distance\": 124}";
     String msg_pub ="{\"connected\":true}";
     mqttClient.publish(topic_pub.c_str(), msg_pub.c_str());
     // Serial.println("MQTT published: " + msg_pub + " -- loop: " + publish_time_ms);
@@ -151,4 +148,18 @@ void WebConfigMQTT::parseWebConfig(JsonObjectConst configObject){
   }
   for (unsigned int i = 0; i < configObject["sub_topic"].size(); i++)
     this->sub_topic[i] = configObject["sub_topic"][i].as<String>();
+
+  uint32_t chipId = 0;
+  #ifdef ESP32
+  for(int i=0; i<17; i=i+8) {
+	  chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+	}
+  // Serial.printf("ESP32 Chip model = %s Rev %d\n", ESP.getChipModel(), ESP.getChipRevision());
+  // Serial.printf("This chip has %d cores\n", ESP.getChipCores());
+  // Serial.print("Chip ID: "); Serial.println(chipId);
+  #else degined(ESP8266)
+    chipId = ESP.getChipId();
+  #endif
+
+  this->base_topic_pub = "/" + id_name + "/" + chipId + "/";
 };

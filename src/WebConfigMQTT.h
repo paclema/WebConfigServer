@@ -38,6 +38,7 @@ private:
   String server;
   int port;
   String id_name;
+  String base_topic_pub;
   bool reconnect_mqtt;
   bool enable_user_and_pass;
   String user_name;
@@ -58,10 +59,11 @@ public:
   void loop(void);
 
   bool isEnabled(void) { return enabled; }
-  bool getReconnect(void) { return reconnect_mqtt; }
   bool isConnected(void) { return mqttClient.connected(); }
-
+  bool getReconnect(void) { return reconnect_mqtt; }
   int getPublishTime(void) { return publish_time_ms; }
+  String getBaseTopic(void) { return base_topic_pub; }
+
   void setPublishTime(int ms) { publish_time_ms = ms; }
   PubSubClient *getMQTTClient(void) { return &mqttClient; }
 

@@ -217,6 +217,7 @@ public:
   void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
 
   PubSubClient *getMQTTClient(void) { return mqtt.getMQTTClient(); }
+  String getDeviceTopic(void) { return mqtt.getBaseTopic(); }
 
 private:
 
