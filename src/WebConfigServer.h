@@ -219,6 +219,13 @@ public:
   PubSubClient *getMQTTClient(void) { return mqtt.getMQTTClient(); }
   String getDeviceTopic(void) { return mqtt.getBaseTopic(); }
 
+  unsigned long getDeviceSetupTime(void) {return deviceSetupTime; }
+
+  void setPreSleepRoutine(void (*routine)()) { 
+    this->preSleep_routine = routine; 
+    preSleep_routine_configured = true;
+  };
+
 private:
 
   // LinkedList<IWebConfig*> configs = LinkedList<IWebConfig*>();
@@ -250,7 +257,15 @@ private:
   #endif
 
   unsigned long currentLoopMillis = 0;
+
+  // Device Sleep
+  bool deviceSetupDone = false;
+  unsigned long deviceSetupTime = 0;
+  void (*preSleep_routine)();
+  bool preSleep_routine_configured = false;
   
+
+
   void configureServer(void);
 
   void addConfigService(IWebConfig* config, String nameObject);
@@ -285,6 +300,9 @@ private:
     void handleAPStations(void);
   #endif
   void networkRestart(void);
+
+  void deepSleepHandler(void);
+
 
   String getContentType(String filename);
 

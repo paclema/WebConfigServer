@@ -1133,6 +1133,11 @@ String WebConfigServer::getContentType(String filename) {
 void WebConfigServer::loop(void){
 
   currentLoopMillis = millis();
+
+  if (!deviceSetupDone) {
+    deviceSetupTime = currentLoopMillis;
+    deviceSetupDone = true;
+  }
   
   // Handle stations connection to the AP:
   #if ESP32 && IP_NAPT
@@ -1157,9 +1162,7 @@ void WebConfigServer::loop(void){
   if (services.ota.isEnabled()) services.ota.handle();
   if (services.ftp.enabled) ftpSrv.handleFTP();
   if (services.webSockets.isEnabled()) services.webSockets.handle();
-  // if (services.deep_sleep.enabled){
-  //   deepSleepHandler();
-  // }
+  if (services.deep_sleep.enabled) deepSleepHandler();
 
 
   // NTP time example:
@@ -1353,3 +1356,43 @@ void WebConfigServer::handleAPStations(void){
 #endif
 
 
+void WebConfigServer::deepSleepHandler() {
+
+
+  #ifdef ESP32
+    #pragma message ( "WebConfig deepSleep not implemented yet for ESP32" )
+    if (currentLoopMillis > deviceSetupTime + (services.deep_sleep.sleep_delay*1000)){
+
+      if (preSleep_routine_configured) (*this->preSleep_routine)();
+
+      Serial.println("   - Deep sleep -> mode not available. Not implemented yet for ESP32");
+      delay(100);
+
+    }
+
+  #elif defined(ESP8266)
+    if (currentLoopMillis > deviceSetupTime + (services.deep_sleep.sleep_delay*1000)){
+
+      if (preSleep_routine_configured) (*this->preSleep_routine)();
+      delay(100);
+
+      if(services.deep_sleep.sleep_time == 0) Serial.printf("Deep sleep activated forever or until RST keeps HIGH...\n");
+      else Serial.printf("Deep sleep activated for %f seconds...\n", services.deep_sleep.sleep_time);
+      if (services.deep_sleep.mode == "WAKE_RF_DEFAULT")
+        // sleep_time is in secs, but the function gets microsecs
+        ESP.deepSleep(services.deep_sleep.sleep_time * 1000000, WAKE_RF_DEFAULT);
+      else if (services.deep_sleep.mode == "WAKE_RF_DISABLED")
+        ESP.deepSleep(services.deep_sleep.sleep_time * 1000000, WAKE_RF_DISABLED);
+      else if (services.deep_sleep.mode == "WAKE_RFCAL")
+        ESP.deepSleep(services.deep_sleep.sleep_time * 1000000, WAKE_RFCAL);
+      else if (services.deep_sleep.mode == "WAKE_NO_RFCAL")
+        ESP.deepSleep(services.deep_sleep.sleep_time * 1000000, WAKE_NO_RFCAL);
+      else {
+        Serial.println("   - Deep sleep -> mode not available");
+        delay(100);
+        return;
+      }
+    }
+  #endif
+
+}
