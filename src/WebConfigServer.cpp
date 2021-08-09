@@ -18,9 +18,9 @@ WebConfigServer::WebConfigServer(void){
 bool WebConfigServer::begin(void){
 
   // Setup internal configs:
-  WebConfigServer::addConfig(&mqtt, "mqtt");
-  WebConfigServer::addConfigService(&services.ota, "OTA");
-  WebConfigServer::addConfigService(&services.webSockets, "WebSockets");
+  WebConfigServer::addConfig(mqtt, "mqtt");
+  WebConfigServer::addConfigService(services.ota, "OTA");
+  WebConfigServer::addConfigService(services.webSockets, "WebSockets");
 
 
   #ifdef ESP32
@@ -215,19 +215,19 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
 }
 
 
-void WebConfigServer::addConfig(IWebConfig* config, String nameObject){
-  config->nameConfigObject = nameObject;
-  this->configs.add(config);
+void WebConfigServer::addConfig(IWebConfig& config, String nameObject){
+  config.nameConfigObject = nameObject;
+  configs.add(&config);
   Serial.print("IWebConfig Object added for: ");
-  Serial.println(config->nameConfigObject);
+  Serial.println(config.nameConfigObject);
 };
 
 
-void WebConfigServer::addConfigService(IWebConfig* config, String nameObject){
-  config->nameConfigObject = nameObject;
-  this->configsServices.add(config);
+void WebConfigServer::addConfigService(IWebConfig& config, String nameObject){
+  config.nameConfigObject = nameObject;
+  configsServices.add(&config);
   Serial.print("IWebConfig Object added for: ");
-  Serial.println(config->nameConfigObject);
+  Serial.println(config.nameConfigObject);
 };
 
 

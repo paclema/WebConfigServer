@@ -213,7 +213,7 @@ public:
 
   String status(void) { return config_status;};
 
-  void addConfig(IWebConfig* config, String nameObject);
+  void addConfig(IWebConfig& config, String nameObject);
   void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
 
   PubSubClient *getMQTTClient(void) { return mqtt.getMQTTClient(); }
@@ -232,7 +232,6 @@ private:
   // LinkedList<IWebConfig*> configsServices = LinkedList<IWebConfig*>();
   SimpleList<IWebConfig*> configs = SimpleList<IWebConfig*>();
   SimpleList<IWebConfig*> configsServices = SimpleList<IWebConfig*>();
-
 
   #ifdef USE_ASYNC_WEBSERVER
     AsyncWebServer * server;
@@ -268,7 +267,7 @@ private:
 
   void configureServer(void);
 
-  void addConfigService(IWebConfig* config, String nameObject);
+  void addConfigService(IWebConfig& config, String nameObject);
   void parseIWebConfig(const JsonDocument& doc);
   void parseIWebConfigService(const JsonDocument& doc);
 
