@@ -26,11 +26,11 @@
 #define ARDUINOJSON_ENABLE_ALIGNMENT 1
 
 
-// #include <LinkedList.h>
+#include <LinkedList.h>
 // Using AsyncWebServer LinkedList lib can not be used because there is a class
 // using the same name. For that reason, for now we use SimpleList until we fix
 // this using namespace for example. Check PR: https://github.com/me-no-dev/ESPAsyncWebServer/pull/1029
-#include <SimpleList.h>
+// #include <SimpleList.h>
 #include "IWebConfig.h"
 
 
@@ -228,10 +228,10 @@ public:
 
 private:
 
-  // LinkedList<IWebConfig*> configs = LinkedList<IWebConfig*>();
-  // LinkedList<IWebConfig*> configsServices = LinkedList<IWebConfig*>();
-  SimpleList<IWebConfig*> configs = SimpleList<IWebConfig*>();
-  SimpleList<IWebConfig*> configsServices = SimpleList<IWebConfig*>();
+  LinkedList<IWebConfig*> configs = LinkedList<IWebConfig*>();
+  LinkedList<IWebConfig*> configsServices = LinkedList<IWebConfig*>();
+  // SimpleList<IWebConfig*> configs = SimpleList<IWebConfig*>();
+  // SimpleList<IWebConfig*> configsServices = SimpleList<IWebConfig*>();
 
   #ifdef USE_ASYNC_WEBSERVER
     AsyncWebServer * server;

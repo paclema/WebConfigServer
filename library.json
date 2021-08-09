@@ -30,10 +30,16 @@
       "version": "^1.1.1",
       "platforms": "espressif32"
     },
+    // {
+    //   "name": "ESP Async WebServer",
+    //   "owner": "me-no-dev",
+    //   "version": "^1.2.3",
+    //   "platforms": ["espressif8266", "espressif32"]
+    // },
     {
       "name": "ESP Async WebServer",
-      "owner": "me-no-dev",
-      "version": "^1.2.3",
+      "owner": "paclema",
+      "version": "https://github.com/paclema/ESPAsyncWebServer/tree/namespace-ESPAsyncWebServer",
       "platforms": ["espressif8266", "espressif32"]
     },
     {
