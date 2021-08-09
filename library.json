@@ -64,7 +64,7 @@
       "platforms": ["espressif8266", "espressif32"]
     },
     {
-      "name": "esp8266FTPServer",
+      "name": "ESP8266FtpServer",
       "owner": "nailbuster",
       "version": "^1.0.1",
       "platforms": "*"
