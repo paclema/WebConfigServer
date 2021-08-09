@@ -33,7 +33,7 @@
     {
       "name": "ESP Async WebServer",
       "owner": "paclema",
-      "version": "https://github.com/paclema/ESPAsyncWebServer/tree/namespace-ESPAsyncWebServer",
+      "version": "https://github.com/paclema/ESPAsyncWebServer.git#namespace-ESPAsyncWebServer",
       "platforms": ["espressif8266", "espressif32"]
     },
     {
