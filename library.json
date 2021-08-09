@@ -62,6 +62,12 @@
       "name": "SimpleList",
       "version": "https://github.com/spacehuhn/SimpleList",
       "platforms": ["espressif8266", "espressif32"]
+    },
+    {
+      "name": "esp8266FTPServer",
+      "owner": "nailbuster",
+      "version": "^1.0.1",
+      "platforms": "*"
     }
   ],
   "platforms": [
