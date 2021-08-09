@@ -119,7 +119,7 @@ void WebConfigMQTT::loop(void){
     previousMQTTPublishMillis = currentLoopMillis;
     // Here starts the MQTT publish loop configured:
 
-    String topic_pub = base_topic_pub + "data";
+    String topic_pub = base_topic_pub + "status";
     String msg_pub ="{\"connected\":true}";
     mqttClient.publish(topic_pub.c_str(), msg_pub.c_str());
     // Serial.println("MQTT published: " + msg_pub + " -- loop: " + publish_time_ms);
