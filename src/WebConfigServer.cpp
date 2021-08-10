@@ -324,6 +324,7 @@ void WebConfigServer::enableServices(void){
         delay(20);
         Serial.print(".");
       }
+      cbtime_set = true;
       Serial.println("");
     #endif
     

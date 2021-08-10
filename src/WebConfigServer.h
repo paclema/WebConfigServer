@@ -174,9 +174,9 @@ public:
     long gmtOffset_sec;
     int daylightOffset_sec;
   };
+  bool cbtime_set = false;
   #if defined(ESP8266)
     timeval cbtime;			// time set in callback
-    bool cbtime_set = false;
 
     // Callback function to know when the time is synch with ntp server:
     void time_is_set(void) {
