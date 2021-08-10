@@ -114,6 +114,7 @@ void WebConfigMQTT::loop(void){
   
   mqttClient.loop();
 
+  /*
   if(mqttClient.connected() && (publish_time_ms != 0) &&
       (currentLoopMillis - previousMQTTPublishMillis > (unsigned)publish_time_ms)) {
     previousMQTTPublishMillis = currentLoopMillis;
@@ -122,8 +123,8 @@ void WebConfigMQTT::loop(void){
     String topic_pub = base_topic_pub + "status";
     String msg_pub ="{\"connected\":true}";
     mqttClient.publish(topic_pub.c_str(), msg_pub.c_str());
-    // Serial.println("MQTT published: " + msg_pub + " -- loop: " + publish_time_ms);
   }
+  */
 
 };
 
