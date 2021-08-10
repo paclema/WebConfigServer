@@ -222,8 +222,8 @@ public:
 
   PubSubClient *getMQTTClient(void) { return mqtt.getMQTTClient(); }
   String getDeviceTopic(void) { return mqtt.getBaseTopic(); }
-
   unsigned long getDeviceSetupTime(void) {return deviceSetupTime; }
+  bool getTimeSet(void) {return cbtime_set; }
 
   void setPreSleepRoutine(void (*routine)()) { 
     this->preSleep_routine = routine; 
