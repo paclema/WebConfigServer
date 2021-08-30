@@ -162,7 +162,7 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
   network.ap_max_connection = doc["network"]["AP_max_connection"] | 4;
   network.ssid_name = doc["network"]["WiFi_SSID"] | "SSID_name";
   network.ssid_password = doc["network"]["WiFi_password"] | "SSID_password";
-  network.ap_max_connection = doc["network"]["connection_retries"] | 0;
+  network.connection_retries = doc["network"]["connection_retries"] | 0;
   network.ip_address = doc["network"]["ip_address"] | "192.168.1.2";
   network.subnet = doc["network"]["subnet"] | "255.255.255.0";
   network.dns_server = doc["network"]["dns_server"] | "192.168.1.1";
