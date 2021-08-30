@@ -309,7 +309,7 @@ void WebConfigServer::enableServices(void){
     } else Serial.println("   - Light sleep -> disabled");
   #endif
 
-  if (services.ntp.enabled){
+  if (services.ntp.enabled && WiFi.status() == WL_CONNECTED){
     configTime(services.ntp.gmtOffset_sec, services.ntp.daylightOffset_sec, services.ntp.ntpServer.c_str());
 
     #ifdef ESP8266
@@ -1220,12 +1220,13 @@ void WebConfigServer::networkRestart(void){
       int retries = 0;
       // while ((wifiMulti.run() != WL_CONNECTED)) {   // Using wifiMulti
       while (WiFi.status() != WL_CONNECTED) {    // Connecting just to one ap
-        Serial.print('.');
+        if (network.connection_retries == 0) Serial.print('.');
+        else Serial.printf(" %d of %d \n", retries, network.connection_retries);
         delay(500);
         retries++;
-        if (network.connection_retries != 0 && (retries >= network.connection_retries)) break;
+        if (network.connection_retries != 0 && (retries > network.connection_retries)) break;
       }
-      if ((network.connection_retries != 0 && (retries >= network.connection_retries)) || network.connection_retries == 0) {
+      if ((network.connection_retries != 0 && (retries <= network.connection_retries)) || network.connection_retries == 0) {
         Serial.print("\n\nConnected to ");Serial.print(WiFi.SSID());
         Serial.print("\nIP address:\t");Serial.println(WiFi.localIP());
       } else {Serial.print("\n\nNot Connected to ");Serial.print(network.ssid_name);Serial.println(" max retries reached.");}
