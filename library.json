@@ -71,7 +71,6 @@
     },
     {
       "name": "PubSubClient",
-      "owner": "knolleary",
       "version": "^2.8",
       "platforms": "*"
     }
