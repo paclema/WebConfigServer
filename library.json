@@ -68,6 +68,12 @@
       "owner": "nailbuster",
       "version": "https://github.com/nailbuster/esp8266FTPServer",
       "platforms": "*"
+    },
+    {
+      "name": "PubSubClient",
+      "owner": "knolleary",
+      "version": "^2.8",
+      "platforms": "*"
     }
   ],
   "platforms": [
