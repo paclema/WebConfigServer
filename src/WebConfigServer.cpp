@@ -271,7 +271,8 @@ void WebConfigServer::enableServices(void){
 
 
   if (services.ftp.enabled && services.ftp.user !=NULL && services.ftp.password !=NULL){
-    ftpSrv.begin(services.ftp.user,services.ftp.password);
+    // ftpSrv.begin(services.ftp.user,services.ftp.password);
+    ftpSrv.begin(services.ftp.user.c_str(),services.ftp.password.c_str());
     Serial.println("   - FTP -> enabled");
   } else Serial.println("   - FTP -> disabled");
 
@@ -673,6 +674,33 @@ void WebConfigServer::configureServer(){
   });
 
 
+	server->on("/uploadFile", HTTP_POST, [&, this](AsyncWebServerRequest *request) {
+		// AsyncWebServerResponse *response = request->beginResponse(200, "text/html", "hello world");
+
+		// AsyncWebServerResponse *response = request->beginResponse(200, "application/json", "{ \"status\": true, \"message\": \"File is uploaded\"}");
+
+		// response->addHeader("Connection", "close");
+		// request->send(response);.
+    
+    // List all parameters
+    int params = request->params();
+    Serial.printf(" \n/uploadFile Request parameters: %d\n", params);
+    for(int i=0;i<params;i++){
+      AsyncWebParameter* p = request->getParam(i);
+      if(p->isFile()){ //p->isPost() is also true
+        Serial.printf("FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
+      } else if(p->isPost()){
+        Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      } else {
+        Serial.printf("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+      }
+    }
+
+
+	}, handleUpload);
+
+  server->onFileUpload(handleUpload);
+
   // Handle files also gzipped if requested other file not configured using serveStatic():
   server->onNotFound([&, this](AsyncWebServerRequest *request) {
     // If the client requests any URI
@@ -689,6 +717,48 @@ void WebConfigServer::configureServer(){
 
   // TODO: move this to reconnect future method:
   WebConfigServer::enableServices();
+}
+
+void WebConfigServer::handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+
+  File file;
+
+  // The file will come chunked if it is to big
+	if (!index) {
+    // For the first chunk we open the file to override it
+		// Serial.printf("UploadStart: %s\n", filename.c_str());
+    file = SPIFFS.open(filename, "w");
+	} else{
+    // The rest of the chunks we apend them into the file
+    file = SPIFFS.open(filename, "a");
+  }
+
+  size_t writeSize = file.write(data,len);
+  // Serial.printf("File index: %u B- size: %u B - wrote: %u B\n", index, len, writeSize);
+  // Serial.printf("SPIFFS totalBytes: %u B- usedBytes: %u B\n",  SPIFFS.totalBytes(), SPIFFS.usedBytes());
+
+  if( writeSize != len){
+    Serial.printf("Error writing the next file chunk. Index: %u B - size: %u B - wrote: %u B\n", index, len, writeSize);
+    AsyncWebServerResponse *response = request->beginResponse(507, "application/json", "{ \"status\": false, \"message\": \"File not fully saved\", \"data\": "\
+                                            "{\"name\": \"" + filename + "\", \"mimetype\": \"application/octet-stream\", \"size\": " + (unsigned int)(index + len) + "}}");
+		response->addHeader("Connection", "close");
+		request->send(response);
+  }
+
+  // To print the file using the serial monitor:
+	// for (size_t i = 0; i < len; i++) {
+	// 	Serial.write(data[i]);
+	// }
+
+	if (final) {
+		// Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index + len);    
+    AsyncWebServerResponse *response = request->beginResponse(200, "application/json", "{ \"status\": true, \"message\": \"File is uploaded\", \"data\": "\
+                                               "{\"name\": \"" + filename + "\", \"mimetype\": \"application/octet-stream\", \"size\": " + (unsigned int)(index + len) + "}}");
+		response->addHeader("Connection", "close");
+		request->send(response);
+	}
+
+  file.close();
 }
 
 
@@ -873,6 +943,73 @@ void WebConfigServer::configureServer(){
       }
       server->send ( 200, "text/json", "{\"message\": \"Device restarted\"}" );
     }
+  });
+
+
+  server->on("/uploadFile", HTTP_POST, [&, this](){
+
+    // List all parameters
+    int args = server->args();
+    Serial.printf(" \n/uploadFile Request args: %d\n", args);
+    for (uint8_t i = 0; i < args; i++) {
+      Serial.print("Param " + server->argName(i) + ": " + server->arg(i) + "\n");
+    }
+
+    // List all headers
+    int headers = server->headers();
+    Serial.printf(" \n/uploadFile Request headers: %d\n", args);
+    for (uint8_t i = 0; i < headers; i++) {
+      Serial.print("Header " + server->headerName(i) + ": " + server->header(i) + "\n");
+    }
+
+
+  },[&, this](){
+    
+    HTTPUpload& upload = server->upload();
+    File file;
+    if(upload.status == UPLOAD_FILE_START){
+        Serial.printf("UploadStart: %s\n", upload.filename.c_str());
+
+        // For the first chunk we open the file to override it
+        file = SPIFFS.open(upload.filename, "w");
+      if(!file){
+        Serial.println("- failed to open file for writing");
+        return;
+      }
+    }
+    
+    if(upload.status == UPLOAD_FILE_WRITE){
+
+      // The rest of the chunks we apend them into the file
+      file = SPIFFS.open(upload.filename, "a");
+      size_t writeSize = file.write(upload.buf,upload.currentSize);
+      if( writeSize != upload.currentSize){
+        // Serial.printf("Error writing the next file chunk. Index: %u B - size: %u B - wrote: %u B\n", index, len, writeSize);
+        Serial.printf("Error writing the next file chunk. Total size: %u B - currentSize: %u B- wrote: %u B\n", upload.totalSize, upload.currentSize, writeSize);
+        server->sendHeader("Connection", "close");
+        server->send(507, "application/json", "{ \"status\": false, \"message\": \"File not fully saved\", \"data\": "\
+                                                "{\"name\": \"" + upload.filename + "\", \"mimetype\": \"application/octet-stream\", \"size\": " + (unsigned int)upload.totalSize + "}}");
+        file.close();
+        return;
+      } else {
+          // Serial.printf("Total size: %u B - currentSize: %u B- wrote: %u B\n", upload.totalSize, upload.currentSize, writeSize);
+          // For ESP32:
+          // Serial.printf("SPIFFS totalBytes: %u B- usedBytes: %u B\n",  SPIFFS.totalBytes(), SPIFFS.usedBytes());
+          // For ESP8266
+          // FSInfo fs_info;
+          // SPIFFS.info(fs_info);
+          // Serial.printf("SPIFFS totalBytes: %u B- usedBytes: %u B\n",  fs_info.totalBytes, fs_info.usedBytes);
+      }
+
+    } else if(upload.status == UPLOAD_FILE_END){
+        Serial.printf("UploadEnd: %s, %u B\n", upload.filename.c_str(), upload.totalSize);
+        server->sendHeader("Connection", "close");
+        server->send(200, "application/json", "{ \"status\": true, \"message\": \"File is uploaded\", \"data\": "\
+                                                "{\"name\": \"" + upload.filename + "\", \"mimetype\": \"application/octet-stream\", \"size\": " + (unsigned int)upload.totalSize + "}}");
+    }
+
+    file.close();
+
   });
 
   // Handle files also gziped:
@@ -1064,6 +1201,70 @@ void WebConfigServer::configureServer(){
       }
       server->send ( 200, "text/json", "{\"message\": \"Device restarted\"}" );
     }
+
+  });
+
+
+  server->on("/uploadFile", HTTP_POST, [&, this](){
+
+    // List all parameters
+    int args = server->args();
+    Serial.printf(" \n/uploadFile Request args: %d\n", args);
+    for (uint8_t i = 0; i < args; i++) {
+      Serial.print("Param " + server->argName(i) + ": " + server->arg(i) + "\n");
+    }
+
+    // List all headers
+    int headers = server->headers();
+    Serial.printf(" \n/uploadFile Request headers: %d\n", args);
+    for (uint8_t i = 0; i < headers; i++) {
+      Serial.print("Header " + server->headerName(i) + ": " + server->header(i) + "\n");
+    }
+
+
+  },[&, this](){
+    
+    HTTPUpload& upload = server->upload();
+    File file;
+    if(upload.status == UPLOAD_FILE_START){
+        Serial.printf("UploadStart: %s\n", upload.filename.c_str());
+
+        // For the first chunk we open the file to override it
+        file = SPIFFS.open(upload.filename, "w");
+      if(!file){
+        Serial.println("- failed to open file for writing");
+        return;
+      }
+    }
+    
+    if(upload.status == UPLOAD_FILE_WRITE){
+
+      // The rest of the chunks we apend them into the file
+      file = SPIFFS.open(upload.filename, "a");
+      size_t writeSize = file.write(upload.buf,upload.currentSize);
+      if( writeSize != upload.currentSize){
+        // Serial.printf("Error writing the next file chunk. Index: %u B - size: %u B - wrote: %u B\n", index, len, writeSize);
+        Serial.printf("Error writing the next file chunk. Total size: %u B - currentSize: %u B- wrote: %u B\n", upload.totalSize, upload.currentSize, writeSize);
+        server->sendHeader("Connection", "close");
+        server->send(507, "application/json", "{ \"status\": false, \"message\": \"File not fully saved\", \"data\": "\
+                                                "{\"name\": \"" + upload.filename + "\", \"mimetype\": \"application/octet-stream\", \"size\": " + (unsigned int)upload.totalSize + "}}");
+        file.close();
+        return;
+      } else {
+          // Serial.printf("Total size: %u B - currentSize: %u B- wrote: %u B\n", upload.totalSize, upload.currentSize, writeSize);
+          // FSInfo fs_info;
+          // SPIFFS.info(fs_info);
+          // Serial.printf("SPIFFS totalBytes: %u B- usedBytes: %u B\n",  fs_info.totalBytes, fs_info.usedBytes);
+      }
+
+    } else if(upload.status == UPLOAD_FILE_END){
+        Serial.printf("UploadEnd: %s, %u B\n", upload.filename.c_str(), upload.totalSize);
+        server->sendHeader("Connection", "close");
+        server->send(200, "application/json", "{ \"status\": true, \"message\": \"File is uploaded\", \"data\": "\
+                                                "{\"name\": \"" + upload.filename + "\", \"mimetype\": \"application/octet-stream\", \"size\": " + (unsigned int)upload.totalSize + "}}");
+    }
+
+    file.close();
 
   });
 

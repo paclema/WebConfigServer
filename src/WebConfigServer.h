@@ -47,7 +47,6 @@
 
 // FTP server
 #include <ESP8266FtpServer.h>
-#include <FS.h>
 
 // NTP
 #include <time.h>                         // time() ctime()
@@ -290,6 +289,7 @@ private:
   #ifdef USE_ASYNC_WEBSERVER
     void updateGpio(AsyncWebServerRequest *request);
     bool handleFileRead(AsyncWebServerRequest *request, String path);
+    static void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
   #elif defined(ESP32)
     void updateGpio(WebServer *server);
     bool handleFileRead(WebServer *server, String path);
