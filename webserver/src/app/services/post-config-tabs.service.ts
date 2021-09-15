@@ -74,4 +74,13 @@ export class PostConfigTabsService {
 
   }
 
+  uploadFile(dataPost){
+    const urlTemp = this._urlBase + "/uploadFile";
+    return this._http.post<any>(urlTemp, dataPost, {
+                reportProgress: true,
+                observe: 'events'
+                }).pipe(catchError(this.errorHandler));
+
+  }
+
 }

@@ -3,6 +3,14 @@
 <div class="container-fluid">
 <ng-container *ngIf="errorMsg"><div class="alert alert-danger" role="alert">{{errorMsg}}</div></ng-container>
 
+
+
+<!-- 
+*
+*      TAB LIST
+*
+-->
+
 <!-- Reactive Form with configTabsForm property -->
 <!-- <hr /> -->
 <form [formGroup]="configTabsForm">
@@ -28,21 +36,36 @@
 </ul>
 
 
+
+
+<!-- 
+*
+*      TAB CONTENT
+*
+-->
+
+
 <div class="tab-content" id="myTabContent">
   <ng-container *ngFor="let tabname of configTabsForm.controls | keyvalue : returnZero; first as isFirst; index as index">
     <!-- <form [formGroup]="configTabsForm.controls[index]"> -->
-    <ng-container *ngIf="isFirst; then thenBlock; else elseBlock"></ng-container>
-    <ng-template #thenBlock>
+    <ng-container *ngIf="isFirst; then FirstTab; else RestTabs"></ng-container>
+
+    <!-- 
+    *
+    *      FIRST TAB CONTENT
+    *
+    -->
+    <ng-template #FirstTab>
       <div [formGroupName]="tabname.key" class="tab-pane fade show active" id="{{tabname.key}}" role="tabpanel" aria-labelledby='{{tabname.key+ "-tab"}}'>
         <div class="panel-heading"><small>{{tabname.key.charAt(0).toUpperCase() + tabname.key.slice(1) + " configuration"}} </small></div>
 
         <div id='{{tabname.key+"_body"}}' class="panel-body row">
           <ng-container *ngFor="let configparam of configTabsForm.get(tabname.key).controls | keyvalue : returnZero; first as isFirst; index as index">
             <!-- <h5>{{configparam.key + " :" + configparam.value}}</h5> -->
-            <!-- {{log(typeConfig(configparam.value.value))}} -->
-            <!-- {{typeConfig(configparam.value.value)}} -->
+            <!-- {{log(getTypeInputForm(configparam.value.value))}} -->
+            <!-- {{getTypeInputForm(configparam.value.value)}} -->
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'string'">
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'string'">
               <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
                 <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
                 <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
@@ -56,7 +79,7 @@
               </div>
             </ng-container>
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'number' ">
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'number' ">
               <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
                 <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
                 <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
@@ -70,7 +93,7 @@
               </div>
             </ng-container>
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'boolean' ">
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'boolean' ">
               <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-check col-md-3">
                 <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
                   <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
@@ -83,7 +106,7 @@
               </div>
             </ng-container>
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'object' ">
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'object' ">
               <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
                 <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
                 <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
@@ -101,17 +124,50 @@
         </div>
       </div>
     </ng-template>
-    <ng-template #elseBlock>
+
+    <!-- 
+    *
+    *      REST TABS CONTENT
+    *
+    -->
+    <ng-template #RestTabs>
       <div formGroupName="{{tabname.key}}" class="tab-pane fade" id="{{tabname.key}}" role="tabpanel" aria-labelledby='{{tabname.key+ "-tab"}}'>
         <div class="panel-heading"><small>{{tabname.key.charAt(0).toUpperCase() + tabname.key.slice(1) + " configuration"}} </small></div>
         <div id='{{tabname.key+"_body"}}' class="panel-body row">
 
           <ng-container *ngFor="let configparam of configTabsForm.get(tabname.key).controls | keyvalue : returnZero; first as isFirst; index as index">
             <!-- <h5>{{configparam.key + " :" + configparam.value}}</h5> -->
-            <!-- {{log(typeConfig(configparam.value.value))}} -->
-            <!-- {{typeConfig(configparam.value.value)}} -->
+            <!-- {{log(getTypeInputForm(configparam.key))}} -->
+            <!-- {{getTypeInputForm(configparam.value.value)}} -->
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'string'">
+            <ng-container *ngIf="isFileForm(configparam.key) == true ; then FileInput; else FormInput"></ng-container>
+            <ng-template #FileInput >
+              <ng-container>
+                <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
+                  
+                  <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
+                  <div class="col-md-12">
+                    <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id='{{tabname.key + "_" + configparam.key + "_input"}}'
+                    [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
+                    name={{configparam.key}} type="{{configparam.key.includes('password') ? 'password' : 'text'}}"
+                    placeholder={{configparam.key}} class="form-control input-md" value={{configparam.value}}
+                    formControlName="{{configparam.key}}">
+
+                    <small class="text-danger" [class.d-none]="configparam.value.valid || configparam.value.untouched">{{configparam.key}} is required</small>
+                    <input type="file" class="file-input" id='{{tabname.key + "_" + configparam.key + "_customFile"}}'
+                          (change)="onFileSelected($event)" #fileUpload>
+                    <button type="submit" (click)="onUploadFile(tabname.key,configparam.key)">upload</button>
+                    <ng-container *ngIf="this.getFileConfig(tabname.key,configparam.key).uploadProgress">{{this.getFileConfig(tabname.key,configparam.key).uploadProgress + "%"}}</ng-container>
+
+                  </div>
+                </div>
+              </ng-container>
+
+            </ng-template>
+
+            <ng-template #FormInput>
+              
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'string'">
               <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
                 <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
                 <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
@@ -125,7 +181,7 @@
               </div>
             </ng-container>
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'number' ">
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'number' ">
               <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
                 <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
                 <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
@@ -139,10 +195,11 @@
               </div>
             </ng-container>
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'boolean' ">
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'boolean' ">
               <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-check col-md-3">
-                <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
-                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id={{configparam.key}}
+                <!-- <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12"> -->
+                <div class="col-md-12">
+                  <input [readonly]="tabname.key.toLowerCase() == 'info' ? 'readonly' : null" id='{{tabname.key + "_" + configparam.key + "_input"}}'
                   [class.is-invalid]="configparam.value.invalid && configparam.value.touched"
                   name={{configparam.key}} type="checkbox"
                   placeholder={{configparam.key}} class="form-check-input input-md" value={{configparam.value}}
@@ -152,7 +209,7 @@
               </div>
             </ng-container>
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'array' ">
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'array' ">
               <div id='{{tabname.key + "_" + configparam.key + "_form"}}' class="form-group col-md-3">
                 <label class="control-label col-md-12 font-weight-bold" for={{tabname.key}}>{{configparam.key.charAt(0).toUpperCase() + (configparam.key.slice(1) | replaceUnderscore)}}</label>
                 <div id='{{tabname.key + "_" + configparam.key + "_input"}}' class="col-md-12">
@@ -166,7 +223,7 @@
               </div>
             </ng-container>
 
-            <ng-container *ngIf="typeConfig(configparam.value.value) == 'object' ">
+            <ng-container *ngIf="getTypeInputForm(configparam.value.value) == 'object' ">
               <div formGroupName="{{configparam.key}}" id='{{configparam.key}}' class="form-group col-md-3">
 
                 <nb-card accent="info" status="basic">
@@ -199,8 +256,10 @@
                   </ng-container>
                 </nb-card>
               </div>
+              
             </ng-container>
-
+          </ng-template>
+            
 
           </ng-container>
 
@@ -243,23 +302,6 @@
     <button (click)="gpioTest()" id="gpio_test" class="btn btn-info ml-2" type="submit">GPIO LED test</button>
   </div>
 </div>
-
-<!-- Alerts -->
-<ng-container *ngIf="errorMsgPost"><div class="alert alert-danger fixed-bottom alert-dismissible fade show"
-    role="alert" style="width:50%; "><strong>Error: </strong>{{errorMsgPost}}
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-    </div>
-</ng-container>
-
-<ng-container *ngIf="dataMsgPost"><div class="alert alert-success fixed-bottom alert-dismissible fade show"
-    role="alert" style="width:50%; "><strong>Msg: </strong>{{dataMsgPost.message}}
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-    </div>
-</ng-container>
 
 
 </form>

@@ -20,6 +20,19 @@ import {
   NbIconConfig,
 } from '@nebular/theme';
 
+// File upload:
+// import { environment } from '../../environments/environment';
+// _urlBase = (environment.apiUrl ? environment.apiUrl + ":" +environment.apiPort : "http://"+location.host);
+import { HttpEventType  } from '@angular/common/http';
+
+
+interface FileConfig {
+  nameConfig: string
+  nameTab: string
+  location: string
+  file?: File
+  uploadProgress?: number
+}
 
 @Component({
   selector: 'app-config-tabs',
@@ -31,11 +44,8 @@ export class ConfigTabsComponent implements OnInit {
   public configData;
   public errorMsg;
 
-
-  // For the Template Driven Form:
-  public errorMsgPost = false;
-  public dataMsgPost;
-
+  // For handling upload files:
+  fileConfigs: FileConfig[] = [];
 
 
   configTabsForm: FormGroup;
@@ -62,9 +72,6 @@ export class ConfigTabsComponent implements OnInit {
     // Load config.json configuration data:
     this.loadConfigFile();
     // console.log(this.configData);
-    // this.loadApiData();
-
-
           
   }
 
@@ -206,6 +213,12 @@ export class ConfigTabsComponent implements OnInit {
           newTabForm.addControl(ind, this.fb.control(configTabs[tab][ind], Validators.required));
         }
 
+        // Create file instances for each config that contains "file" name:
+        if(this.isFileForm(ind)){
+          // this.fileConfig.push( { nameConfig: ind, location: configTabs[tab][ind], file: null} );
+          this.fileConfigs.push( { nameConfig: ind, nameTab: tab, location: configTabs[tab][ind]} );
+        }
+
       }
       // console.log('newTabForm: ');
       // console.log(newTabForm);
@@ -214,9 +227,10 @@ export class ConfigTabsComponent implements OnInit {
 
     }
     console.log('Form built: configTabsForm');
-    console.log(this.configTabsForm);
+    // console.log(this.configTabsForm);
     // console.log('Form built: configTabsForm.value');
-    console.log(this.configTabsForm.value);
+    // console.log(this.configTabsForm.value);
+    // console.log(this.fileConfigs);
   }
 
   // This function its added to use keyvalue pipe under *ngFor to get the
@@ -241,7 +255,7 @@ export class ConfigTabsComponent implements OnInit {
       return false;
   }
 
-  typeConfig(obj): string {
+  getTypeInputForm(obj): string {
     // console.log("Receiving obj");
     // console.log(obj);
 
@@ -260,6 +274,24 @@ export class ConfigTabsComponent implements OnInit {
 
   }
 
+  isFileForm(obj): boolean {
+    if (obj.includes("file")){
+      return true;
+    } else
+      return false;
+  }
+
+  getFileConfig(nameTab, nameConfig): FileConfig {
+    for(let i in this.fileConfigs) {
+      if((nameTab === this.fileConfigs[i].nameTab) &&
+         (nameConfig === this.fileConfigs[i].nameConfig)){
+        return this.fileConfigs[i];
+      }
+    }
+    return null;
+  }
+
+
   log(val) { console.log(val); }
 
   prettyPrint(text) {
@@ -268,6 +300,55 @@ export class ConfigTabsComponent implements OnInit {
     var pretty = JSON.stringify(text.value, undefined, 4);
     // document.getElementById('myTextArea').value = pretty;
     return pretty;
+  }
+
+  onFileSelected(event) {
+
+    let selectedFile = event.target.id;
+
+    for(let i in this.fileConfigs) {
+      if(selectedFile.includes(this.fileConfigs[i].nameTab) &&
+         selectedFile.includes(this.fileConfigs[i].nameConfig)){
+        console.log('File selected for: ' + this.fileConfigs[i].nameTab + "/" + this.fileConfigs[i].nameConfig);
+        this.fileConfigs[i].file = <File>event.target.files[0];
+        console.log(this.fileConfigs[i]);
+      }
+    }
+
+  }
+
+
+  onUploadFile(nameTab, nameConfig){
+
+    let fileConfigId;
+    const fd = new FormData();
+
+    for(let i in this.fileConfigs) {
+      if((nameTab === this.fileConfigs[i].nameTab) &&
+      (nameConfig === this.fileConfigs[i].nameConfig)){
+        fileConfigId = i;
+        fd.append(this.fileConfigs[i].nameConfig, this.fileConfigs[i].file, this.fileConfigs[i].location );
+        break;
+      }
+    }
+
+    this._postConfigTabsService.uploadFile(fd)
+    .subscribe(
+      event => {
+        if (event.type === HttpEventType.UploadProgress){
+          this.fileConfigs[fileConfigId].uploadProgress = Math.round(event.loaded / event.total * 100);
+        } else if (event.type === HttpEventType.Sent ){
+            this.toastrService.success("Uploading...",this.fileConfigs[fileConfigId].file.name);
+        } else if (event.type === HttpEventType.Response ){
+          this.toastrService.success(event.body.message,event.body.data.name);
+      }
+      },
+      error => {
+        console.log('Error uploading file', error);
+        this.toastrService.danger(error,'Error');
+      }
+    );
+
   }
 
 }

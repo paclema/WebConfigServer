@@ -36,6 +36,12 @@
       "/iot-button/topi3"
     ]
   },
+  "DeviceConfig": {
+    "enabled": false,
+    "ca_file": "/api/ca.crt",
+    "cert_file": "/api/cert.der",
+    "key_file": "/api/private.der"
+  },
   "services": {
     "OTA": true,
     "FTP": {

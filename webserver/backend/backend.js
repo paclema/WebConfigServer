@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const WebSocket = require('ws');
+const fileUpload = require('express-fileupload');
 
 const PORT = 3000;
 const PORT_WEBSOCKETS = 81;
@@ -15,6 +16,12 @@ app.use(cors());
 app.use(express.urlencoded({
   extended: true
 }))
+// enable files upload
+app.use(fileUpload({
+  createParentPath: true
+}));
+
+
 
 app.get('/', function(req, res){
   res.send('Hello from express server')
@@ -166,3 +173,40 @@ setInterval(() => {
         ws.ping(null, false, true);
     });
 }, 10000);
+
+
+
+// File uploads:
+app.post('/uploadFile', async (req, res) => {
+
+  try {
+    console.log(req.files);
+      if(!req.files.ca_file) {
+        res.status(500).send({
+            status: false,
+            message: 'No file uploaded'
+        });
+    } else {
+        //Use the name of the input field (i.e. "ca_file") to retrieve the uploaded file
+        let ca_file = req.files.ca_file;
+        // console.log(ca_file);
+        
+        //Use the mv() method to place the file in upload directory (i.e. "uploads")
+        ca_file.mv('./uploads/' + ca_file.name);
+
+        //send response
+        res.send({
+            status: true,
+            message: 'File is uploaded',
+            data: {
+                name: ca_file.name,
+                mimetype: ca_file.mimetype,
+                size: ca_file.size
+            }
+        });
+    }
+  } catch (err) {
+      console.log(req);
+      res.status(500).send(err);
+  }
+});
