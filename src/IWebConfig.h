@@ -34,11 +34,6 @@ public:
     }
     fileIn.close();
 
-    // Get JSON for nameConfig WebConfig
-    JsonObject rootConfig = doc[nameConfigObject].as<JsonObject>();
-    Serial.println("Current WebConfig: ");
-    serializeJsonPretty(rootConfig, Serial);
-
     // Iterate throught received JsonObject to save
     for (JsonObject::iterator it=newConfigObject.begin(); it!=newConfigObject.end(); ++it) {
       // Serial.print(it->key().c_str());
@@ -61,8 +56,11 @@ public:
       } else if (it->value().is<const char*>()) {
           const char* value = it->value().as<const char*>();
           doc[nameConfigObject][it->key().c_str()] = value;
+      } else if (it->value().is<String>()) {
+          String value = it->value().as<String>();
+          doc[nameConfigObject][it->key().c_str()] = value;
       } else {
-          Serial.printf("%s contains value type not suported to be save", it->key().c_str());
+          Serial.printf("%s contains WebConfig value type not suported to be save\n", it->key().c_str());
           return false;
       }
 
