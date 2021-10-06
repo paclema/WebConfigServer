@@ -10,7 +10,9 @@
 // Allocate a temporary JsonDocument
 // Don't forget to change the capacity to match your requirements.
 // Use arduinojson.org/assistant to compute the capacity.
-#define CONFIG_FILE "/config/config.json"
+#ifndef CONFIG_FILE
+  #define CONFIG_FILE "/config/config.json"
+#endif
 
 #ifndef CONFIG_JSON_SIZE
   #define CONFIG_JSON_SIZE 4096
