@@ -142,7 +142,6 @@ void WebConfigMQTT::parseWebConfig(JsonObjectConst configObject){
   this->ca_file = configObject["ca_file"] | "certs/ca.crt";
   this->cert_file = configObject["cert_file"] | "certs/client.crt";
   this->key_file = configObject["key_file"] | "certs/client.key";
-  this->ca_file = configObject["ca_file"] | "server_address";
   for (unsigned int i = 0; i < configObject["pub_topic"].size(); i++) { //Iterate through results
     // this->pub_topic[i] = configObject["pub_topic"][i];  //Implicit cast
     this->pub_topic[i] = configObject["pub_topic"][i].as<String>(); //Explicit cast
