@@ -27,6 +27,8 @@
     "ca_file": "/certs/ca.crt",
     "cert_file": "/certs/cert.der",
     "key_file": "/certs/private.der",
+    "enable_websockets": false,
+    "websockets_path": "/",
     "pub_topic": [
       "/iot-button/feed"
     ],

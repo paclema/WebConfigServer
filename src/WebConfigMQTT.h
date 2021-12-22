@@ -7,6 +7,7 @@
 
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
+#include "WebSocketStreamClient.h"
 
 #define MQTT_TOPIC_MAX_SIZE_LIST 10
 
@@ -21,9 +22,12 @@ class WebConfigMQTT: public IWebConfig{
 
 private:
 
-  WiFiClientSecure wifiClientSecure;    // To use with mqtt and certificates
-  WiFiClient wifiClient;                // To use with mqtt without certificates
+  WiFiClientSecure wifiClientSecure;
+  WiFiClient wifiClient;
+  WebSocketClient  * wsClient;
+  WebSocketStreamClient * wsStreamClient;
   PubSubClient mqttClient;
+
   unsigned long previousMqttReconnectionMillis = millis();
   unsigned int mqttReconnectionTime = 10000;
   int mqttRetries = 0;
@@ -47,6 +51,8 @@ private:
   String ca_file;
   String cert_file;
   String key_file;
+  bool enable_websockets;
+  String websockets_path;
   String pub_topic[MQTT_TOPIC_MAX_SIZE_LIST];
   String sub_topic[MQTT_TOPIC_MAX_SIZE_LIST];
 
@@ -55,11 +61,13 @@ private:
 public:
 
   void setup(void);
+  void restartWS(void);
   void reconnect(void);
   void loop(void);
 
   bool isEnabled(void) { return enabled; }
   bool isConnected(void) { return mqttClient.connected(); }
+  bool useWebsockets(void) { return enable_websockets; }
   bool getReconnect(void) { return reconnect_mqtt; }
   int getPublishTime(void) { return publish_time_ms; }
   String getBaseTopic(void) { return base_topic_pub; }

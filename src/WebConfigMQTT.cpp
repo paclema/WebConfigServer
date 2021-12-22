@@ -4,14 +4,29 @@
 void WebConfigMQTT::setup(void){
 
   if (enable_certificates){
-    mqttClient.setClient(wifiClientSecure);
-    Serial.println("Configuring MQTT using certificates");
+    if(enable_websockets){
+      wsClient = new WebSocketClient(wifiClientSecure, mqtt_host, mqtt_port);
+      wsStreamClient = new WebSocketStreamClient(*wsClient, mqtt_path);
+      mqttClient.setClient(*wsStreamClient);
+      Serial.println("Configuring MQTT using certificates and websockets");
+    } else {
+      mqttClient.setClient(wifiClientSecure);
+      Serial.println("Configuring MQTT using certificates");
+      mqttClient.setServer(server.c_str(), port);
+    }
   } else {
-    mqttClient.setClient(wifiClient);
-    Serial.println("Configuring MQTT without certificates");
+    if(enable_websockets){
+      wsClient = new WebSocketClient(wifiClient, mqtt_host, mqtt_port);
+      wsStreamClient = new WebSocketStreamClient(*wsClient, mqtt_path);
+      mqttClient.setClient(*wsStreamClient);
+      Serial.println("Configuring MQTT using websockets");
+    } else {
+      mqttClient.setClient(wifiClient);
+      Serial.println("Configuring MQTT using websockets without certificates");
+      mqttClient.setServer(server.c_str(), port);
+    }
   }
 
-  mqttClient.setServer(server.c_str(), port);
   mqttClient.setCallback(WebConfigMQTT::callbackMQTT);
 
   if (enable_certificates){
@@ -22,8 +37,8 @@ void WebConfigMQTT::setup(void){
     if (!cert) Serial.println("Failed to open cert file ");
     else Serial.println("Success to open cert file");
 
-    // if (wifiClientSecure.loadCertificate(cert, cert.size())) Serial.println("cert loaded");
-    // else Serial.println("cert not loaded");
+    if (wifiClientSecure.loadCertificate(cert, cert.size())) Serial.println("cert loaded");
+    else Serial.println("cert not loaded");
     cert.close();
 
     // Load private key:
@@ -33,8 +48,8 @@ void WebConfigMQTT::setup(void){
     if (!private_key) Serial.println("Failed to open key file ");
     else Serial.println("Success to open key file");
 
-    // if (wifiClientSecure.loadPrivateKey(private_key, private_key.size())) Serial.println("key loaded");
-    // else Serial.println("key not loaded");
+    if (wifiClientSecure.loadPrivateKey(private_key, private_key.size())) Serial.println("key loaded");
+    else Serial.println("key not loaded");
     private_key.close();
 
     // Load CA file:
@@ -42,12 +57,18 @@ void WebConfigMQTT::setup(void){
     if (!ca) Serial.println("Failed to open CA file ");
     else Serial.println("Success to open CA file");
 
-    // if (wifiClientSecure.loadCACert(ca, ca.size())) Serial.println("CA loaded");
-    // else Serial.println("CA not loaded");
+    if (wifiClientSecure.loadCACert(ca, ca.size())) Serial.println("CA loaded");
+    else Serial.println("CA not loaded");
     ca.close();
   }
 
 };
+
+
+void WebConfigMQTT::restartWS() {
+  delete wsClient;
+  delete wsStreamClient;
+}
 
 
 void WebConfigMQTT::reconnect() {
@@ -142,6 +163,8 @@ void WebConfigMQTT::parseWebConfig(JsonObjectConst configObject){
   this->ca_file = configObject["ca_file"] | "certs/ca.crt";
   this->cert_file = configObject["cert_file"] | "certs/client.crt";
   this->key_file = configObject["key_file"] | "certs/client.key";
+  this->enable_websockets = configObject["enable_websockets"] | false;
+  this->websockets_path = configObject["websockets_path"] | "/";
   for (unsigned int i = 0; i < configObject["pub_topic"].size(); i++) { //Iterate through results
     // this->pub_topic[i] = configObject["pub_topic"][i];  //Implicit cast
     this->pub_topic[i] = configObject["pub_topic"][i].as<String>(); //Explicit cast
