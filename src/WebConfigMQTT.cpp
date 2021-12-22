@@ -5,8 +5,8 @@ void WebConfigMQTT::setup(void){
 
   if (enable_certificates){
     if(enable_websockets){
-      wsClient = new WebSocketClient(wifiClientSecure, mqtt_host, mqtt_port);
-      wsStreamClient = new WebSocketStreamClient(*wsClient, mqtt_path);
+      wsClient = new WebSocketClient(wifiClientSecure, server.c_str(), port);
+      wsStreamClient = new WebSocketStreamClient(*wsClient, websockets_path.c_str());
       mqttClient.setClient(*wsStreamClient);
       Serial.println("Configuring MQTT using certificates and websockets");
     } else {
@@ -16,8 +16,8 @@ void WebConfigMQTT::setup(void){
     }
   } else {
     if(enable_websockets){
-      wsClient = new WebSocketClient(wifiClient, mqtt_host, mqtt_port);
-      wsStreamClient = new WebSocketStreamClient(*wsClient, mqtt_path);
+      wsClient = new WebSocketClient(wifiClient, server.c_str(), port);
+      wsStreamClient = new WebSocketStreamClient(*wsClient, websockets_path.c_str());
       mqttClient.setClient(*wsStreamClient);
       Serial.println("Configuring MQTT using websockets");
     } else {
