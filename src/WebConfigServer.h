@@ -97,6 +97,7 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
 // WiFi & Network
 #ifdef ESP32
   #include <WiFi.h>
+  #include "esp_wifi.h"
   #include <WiFiMulti.h>
   #include <ESPmDNS.h>
 
@@ -104,9 +105,8 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
   #define PROTO_UDP 17
 
   #if !IP_NAPT
-    #error "IP_NAPT is not available with this configuration."
+    #warning "IP_NAPT is not available with this configuration."
   #else
-    #include "esp_wifi.h"
     #include "lwip/lwip_napt.h"
   #endif
 
