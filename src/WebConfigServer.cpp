@@ -1356,11 +1356,7 @@ void WebConfigServer::loop(void){
 
   // Handle mqtt reconnection:
   if (mqtt.isEnabled()) {
-    if (mqtt.getReconnect() && !mqtt.isConnected()){
-      if (mqtt.useWebsockets()) mqtt.restartWS();
-      mqtt.setup();
-      mqtt.reconnect();
-    }
+    if (mqtt.getReconnect() && !mqtt.isConnected()) mqtt.reconnect();
     mqtt.loop();
   }
 

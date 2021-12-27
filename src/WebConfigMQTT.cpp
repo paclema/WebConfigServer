@@ -1,33 +1,7 @@
 #include "WebConfigMQTT.h"
 
-
 void WebConfigMQTT::setup(void){
 
-  if (enable_certificates){
-    if(enable_websockets){
-      wsClient = new WebSocketClient(wifiClientSecure, server.c_str(), port);
-      wsStreamClient = new WebSocketStreamClient(*wsClient, websockets_path.c_str());
-      mqttClient.setClient(*wsStreamClient);
-      Serial.println("Configuring MQTT using certificates and websockets");
-    } else {
-      mqttClient.setClient(wifiClientSecure);
-      Serial.println("Configuring MQTT using certificates");
-      mqttClient.setServer(server.c_str(), port);
-    }
-  } else {
-    if(enable_websockets){
-      wsClient = new WebSocketClient(wifiClient, server.c_str(), port);
-      wsStreamClient = new WebSocketStreamClient(*wsClient, websockets_path.c_str());
-      mqttClient.setClient(*wsStreamClient);
-      Serial.println("Configuring MQTT using websockets");
-    } else {
-      mqttClient.setClient(wifiClient);
-      Serial.println("Configuring MQTT using websockets without certificates");
-      mqttClient.setServer(server.c_str(), port);
-    }
-  }
-
-  mqttClient.setCallback(WebConfigMQTT::callbackMQTT);
 
   if (enable_certificates){
     // Load certificate file:
@@ -62,18 +36,39 @@ void WebConfigMQTT::setup(void){
     ca.close();
   }
 
+  if (enable_certificates){
+    if(enable_websockets){
+      wsClient = new WebSocketClient(wifiClientSecure, server.c_str(), port);
+      wsStreamClient = new WebSocketStreamClient(*wsClient, websockets_path.c_str());
+      mqttClient.setClient(*wsStreamClient);
+      Serial.printf("Configuring MQTT using certificates and websockets path: %s\n", websockets_path.c_str());
+    } else {
+      mqttClient.setClient(wifiClientSecure);
+      Serial.println("Configuring MQTT using certificates");
+      mqttClient.setServer(server.c_str(), port);
+    }
+  } else {
+    if(enable_websockets){
+      wsClient = new WebSocketClient(wifiClient, server.c_str(), port);
+      wsStreamClient = new WebSocketStreamClient(*wsClient, websockets_path.c_str());
+      mqttClient.setClient(*wsStreamClient);
+      Serial.println("Configuring MQTT using websockets");
+    } else {
+      mqttClient.setClient(wifiClient);
+      Serial.println("Configuring MQTT using websockets without certificates");
+      mqttClient.setServer(server.c_str(), port);
+    }
+  }
+
+  mqttClient.setCallback(WebConfigMQTT::callbackMQTT);
+
 };
-
-
-void WebConfigMQTT::restartWS() {
-  delete wsClient;
-  delete wsStreamClient;
-}
 
 
 void WebConfigMQTT::reconnect() {
   // Loop until we're reconnected
   if (currentLoopMillis - previousMqttReconnectionMillis > mqttReconnectionTime){
+    mqttClient.disconnect();
     if (!mqttClient.connected() && (mqttRetries <= mqttMaxRetries) ) {
       bool mqttConnected = false;
       Serial.print("Attempting MQTT connection... ");
@@ -105,6 +100,14 @@ void WebConfigMQTT::reconnect() {
         // ... and resubscribe
         String base_topic_sub = base_topic_pub + "#";
         mqttClient.subscribe(base_topic_sub.c_str());
+
+        u_int8_t sub_topicSize = MQTT_TOPIC_MAX_SIZE_LIST;
+        for (unsigned int i = 0; i < sub_topicSize ; i++){
+          if (sub_topic[i] == "") break;
+          Serial.printf("MQTT subscribing %d of %d topic %s: %s\n",
+              i, sub_topicSize, sub_topic[i].c_str(),
+              mqttClient.subscribe(sub_topic[i].c_str()) ? "ok" : "failed");
+        }
 
         long time_now = millis() - connectionTime;
         mqttRetries = 0;
@@ -165,12 +168,19 @@ void WebConfigMQTT::parseWebConfig(JsonObjectConst configObject){
   this->key_file = configObject["key_file"] | "certs/client.key";
   this->enable_websockets = configObject["enable_websockets"] | false;
   this->websockets_path = configObject["websockets_path"] | "/";
-  for (unsigned int i = 0; i < configObject["pub_topic"].size(); i++) { //Iterate through results
-    // this->pub_topic[i] = configObject["pub_topic"][i];  //Implicit cast
-    this->pub_topic[i] = configObject["pub_topic"][i].as<String>(); //Explicit cast
-  }
-  for (unsigned int i = 0; i < configObject["sub_topic"].size(); i++)
-    this->sub_topic[i] = configObject["sub_topic"][i].as<String>();
+
+  if (configObject["pub_topic"].size() > 0)
+    for (unsigned int i = 0; i < configObject["pub_topic"].size(); i++)
+      this->sub_topic[i] = configObject["pub_topic"][i].as<String>();
+  else
+    this->sub_topic[0] = configObject["sub_topic"].as<String>();
+
+  if (configObject["sub_topic"].size() > 0)
+    for (unsigned int i = 0; i < configObject["sub_topic"].size(); i++)
+      this->sub_topic[i] = configObject["sub_topic"][i].as<String>();
+  else
+    this->sub_topic[0] = configObject["sub_topic"].as<String>();
+
 
   uint32_t chipId = 0;
   #ifdef ESP32

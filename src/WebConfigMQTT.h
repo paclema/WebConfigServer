@@ -61,7 +61,6 @@ private:
 public:
 
   void setup(void);
-  void restartWS(void);
   void reconnect(void);
   void loop(void);
 
