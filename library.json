@@ -81,8 +81,8 @@
     },
     {
       "name": "ArduinoHttpClient",
-      "owner": "arduino-libraries",
-      "version": "^0.4.0"
+      "owner": "paclema",
+      "version": "https://github.com/paclema/ArduinoHttpClient#init_rxmasked"
     }
   ],
   "platforms": [
