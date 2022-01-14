@@ -29,6 +29,10 @@
 #define CONFIG_LOADED "loaded"
 #define CONFIG_NOT_LOADED "not_loaded"
 
+typedef int8_t WebConfigStatus;
+#define CONFIG_NOT_LOADED            ((WebConfigStatus)   0)
+#define CONFIG_LOADED                ((WebConfigStatus)   1)
+
 #define ARDUINOJSON_ENABLE_ALIGNMENT 1
 
 
@@ -125,8 +129,7 @@ class WebConfigServer {
 
 public:
 
-  // const char* status = new char(32);
-  String config_status;
+  WebConfigStatus config_status = CONFIG_NOT_LOADED;
 
   struct Network {
     String ap_name;
@@ -213,15 +216,17 @@ public:
 
   WebConfigServer(void);
   
+  bool initWebConfigs(void);
   bool begin(void);
   void loop(void);
 
-  String status(void) { return config_status;};
+  WebConfigStatus status(void) { return config_status;};
 
   void addConfig(IWebConfig& config, String nameObject);
   void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
 
   PubSubClient *getMQTTClient(void) { return mqtt.getMQTTClient(); }
+  void setMQTTClientId(String client_id) { mqtt.setMQTTClientId(client_id); }
   String getDeviceTopic(void) { return mqtt.getBaseTopic(); }
   unsigned long getDeviceSetupTime(void) {return deviceSetupTime; }
   bool getTimeSet(void) {return cbtime_set; }

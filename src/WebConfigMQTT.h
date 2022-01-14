@@ -73,9 +73,15 @@ public:
 
   void setPublishTime(int ms) { publish_time_ms = ms; }
   PubSubClient *getMQTTClient(void) { return &mqttClient; }
+  void setMQTTClientId(String client_id) { 
+    id_name = client_id;
+    StaticJsonDocument<192> docSave;
+    docSave["id_name"] = this->id_name;
+    WebConfigMQTT::saveWebConfig(docSave.as<JsonObject>());
+  }
+
 
   void parseWebConfig(JsonObjectConst configObject);
-
 
   
   static void callbackMQTT(char* topic, byte* payload, unsigned int length) {
@@ -89,14 +95,13 @@ public:
       buff[i] = (char)payload[i];
     }
 
-
     buff[length] = '\0';
     String message(buff);
 
     Serial.print(message);
     Serial.println();
 
-  /*
+    /*
     if (strcmp(topic, "/lamp") == 0) {
       //Lamp color request:
       if (message.equals("red")){
@@ -112,10 +117,9 @@ public:
       }
       //client.publish((char*)"/lamp",(char*)"color changed");
     }
-  */
+    */
 
-    Serial.print("Heap: "); Serial.println(ESP.getFreeHeap()); //Low heap can cause problems
-    ///
+    Serial.print("Heap: "); Serial.println(ESP.getFreeHeap());
 
   }
 

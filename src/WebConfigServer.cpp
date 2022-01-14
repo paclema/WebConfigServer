@@ -2,7 +2,6 @@
 
 
 WebConfigServer::WebConfigServer(void){
-  // Serial.println("WebConfigServer loaded");
   config_status = CONFIG_NOT_LOADED;
 
   #ifdef USE_ASYNC_WEBSERVER
@@ -13,41 +12,41 @@ WebConfigServer::WebConfigServer(void){
     server = new ESP8266WebServer(80);
   #endif
 
-}
-
-bool WebConfigServer::begin(void){
-
   // Setup internal configs:
   WebConfigServer::addConfig(mqtt, "mqtt");
   WebConfigServer::addConfigService(services.ota, "OTA");
   WebConfigServer::addConfigService(services.webSockets, "WebSockets");
+}
 
+
+bool WebConfigServer::initWebConfigs(void){
 
   #ifdef ESP32
-    if (!SPIFFS.begin(true)) {
-      Serial.println("SPIFFS Mount failed");
-      config_status = CONFIG_NOT_LOADED;
-      return false;
-    } else {
-      Serial.println("SPIFFS Mount succesfull");
-      File root = SPIFFS.open("/");
-      File file = root.openNextFile();
-      while (file) {
-        String fileName = file.name();
-        size_t fileSize = file.size();
-        Serial.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
-        file = root.openNextFile();
-      }
-
-      if (SPIFFS.exists(CONFIG_FILE)) {
-        Serial.println(); Serial.print(CONFIG_FILE); Serial.println(" exists!");
-        loadConfigurationFile(CONFIG_FILE);
-      // printFile(CONFIG_FILE);
-    } else {
-      config_status = CONFIG_NOT_LOADED;
-      return false;
-      }
+  if (!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS Mount failed");
+    config_status = CONFIG_NOT_LOADED;
+    return false;
+  } else {
+    Serial.println("SPIFFS Mount succesfull");
+    File root = SPIFFS.open("/");
+    File file = root.openNextFile();
+    while (file) {
+      String fileName = file.name();
+      size_t fileSize = file.size();
+      Serial.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
+      file = root.openNextFile();
     }
+    if (SPIFFS.exists(CONFIG_FILE)) {
+      Serial.println(); Serial.print(CONFIG_FILE); Serial.println(" exists!");
+      loadConfigurationFile(CONFIG_FILE);
+      // printFile(CONFIG_FILE);
+      config_status = CONFIG_LOADED;
+      return true;
+    } else {
+      config_status = CONFIG_NOT_LOADED;
+      return false;
+    }
+  }
 
   #elif defined(ESP8266)
     if (!SPIFFS.begin()) {
@@ -66,14 +65,22 @@ bool WebConfigServer::begin(void){
       if (SPIFFS.exists(CONFIG_FILE)) {
         Serial.println(); Serial.print(CONFIG_FILE); Serial.println(" exists!");
         loadConfigurationFile(CONFIG_FILE);
-      // printFile(CONFIG_FILE);
-    } else {
-      config_status = CONFIG_NOT_LOADED;
-      return false;
+        // printFile(CONFIG_FILE);
+        config_status = CONFIG_LOADED;
+        return true;
+      } else {
+        config_status = CONFIG_NOT_LOADED;
+        return false;
       }
     }
   #endif
 
+}
+
+
+bool WebConfigServer::begin(void){
+
+  if (config_status != CONFIG_LOADED) initWebConfigs();
 
   // Configure NTP if enabled before wifi restart:
   if (services.ntp.enabled){
@@ -87,13 +94,15 @@ bool WebConfigServer::begin(void){
     configTime(services.ntp.gmtOffset_sec, services.ntp.daylightOffset_sec, services.ntp.ntpServer.c_str());
   }
 
-  config_status = CONFIG_LOADED;
 
   // Restart the newtwork:
   WebConfigServer::networkRestart();
 
   // Configure and start the server:
   WebConfigServer::configureServer();
+
+  // TODO: move this to reconnect future method:
+  WebConfigServer::enableServices();
 
   // Setup MQTT:
   if (mqtt.isEnabled()) {
@@ -714,9 +723,6 @@ void WebConfigServer::configureServer(){
 
   server->begin();
   Serial.println ( "HTTP server started" );
-
-  // TODO: move this to reconnect future method:
-  WebConfigServer::enableServices();
 }
 
 void WebConfigServer::handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
@@ -1025,9 +1031,6 @@ void WebConfigServer::configureServer(){
   server->begin();
   Serial.println ( "HTTP server started" );
 
-  // TODO: move this to reconnect future method:
-  WebConfigServer::enableServices();
-
 }
 
 
@@ -1280,9 +1283,6 @@ void WebConfigServer::configureServer(){
 
   server->begin();
   Serial.println ( "HTTP server started" );
-
-  // TODO: move this to reconnect future method:
-  WebConfigServer::enableServices();
 
 }
 
