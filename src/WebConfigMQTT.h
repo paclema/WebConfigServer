@@ -85,21 +85,22 @@ public:
 
   
   static void callbackMQTT(char* topic, byte* payload, unsigned int length) {
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
+    // Serial.print("Message arrived [");
+    // Serial.print(topic);
+    // Serial.print("] ");
 
-    char buff[length + 1];
-    for (unsigned int i = 0; i < length; i++) {
-      //Serial.print((char)payload[i]);
-      buff[i] = (char)payload[i];
-    }
+    // char buff[length + 1];
+    // for (unsigned int i = 0; i < length; i++) {
+    //   //Serial.print((char)payload[i]);
+    //   buff[i] = (char)payload[i];
+    // }
+    // buff[length] = '\0';
 
-    buff[length] = '\0';
-    String message(buff);
-
-    Serial.print(message);
-    Serial.println();
+    // String message(buff);
+    // Serial.print(message);
+    // Serial.println();
+  
+    Serial.printf("[%lu] +++ MQTT received %s %.*s\n", millis(), topic, length, payload);
 
     /*
     if (strcmp(topic, "/lamp") == 0) {
