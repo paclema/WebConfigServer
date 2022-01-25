@@ -76,8 +76,8 @@
     },
     {
       "name": "WebSocketStreamClient",
-      "owner": "clysss",
-      "version": "https://github.com/clysss/WebSocketStreamClient"
+      "owner": "paclema",
+      "version": "https://github.com/paclema/WebSocketStreamClient#development"
     },
     {
       "name": "ArduinoHttpClient",
