@@ -6,7 +6,10 @@
 // WebSockets Includes
 #include <WebSocketsServer.h>
 
-#define  MAX_LIST_OBJECT_FUNCTIONS 10
+#ifndef MAX_WS_FUNCTIONS
+#define MAX_WS_FUNCTIONS 10
+#endif
+
 
 #include "IWebConfig.h"
 
@@ -18,11 +21,11 @@ class WebConfigWebSockets: public IWebConfig{
 
 
 // List of objects keys:
-String listObjets[MAX_LIST_OBJECT_FUNCTIONS];
+String listObjets[MAX_WS_FUNCTIONS];
 
 // List of Object values for the listObjects. It represents the value for the key
 // and it will be the String result of the function:
-String (*listObjetFunctions[MAX_LIST_OBJECT_FUNCTIONS])();
+String (*listObjetFunctions[MAX_WS_FUNCTIONS])();
 int listObjetsIndex = 0;
 
 int port = 81;

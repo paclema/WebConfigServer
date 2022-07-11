@@ -96,7 +96,7 @@ void WebConfigWebSockets::handle(void) {
 
 bool WebConfigWebSockets::addObjectToPublish(String key, String (*valueFunction)()) {
 
-  if (this->listObjetsIndex+1 <= MAX_LIST_OBJECT_FUNCTIONS){
+  if (this->listObjetsIndex+1 <= MAX_WS_FUNCTIONS){
     this->listObjets[listObjetsIndex] = key;
     this->listObjetFunctions[listObjetsIndex] = valueFunction;
     this->listObjetsIndex++;
