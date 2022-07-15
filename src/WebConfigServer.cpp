@@ -1,7 +1,8 @@
 #include "WebConfigServer.h"
 
 
-WebConfigServer::WebConfigServer(void){
+WebConfigServer::WebConfigServer(void): 
+  ftpSrv(SPIFFS) {
   config_status = CONFIG_NOT_LOADED;
 
   #ifdef USE_ASYNC_WEBSERVER

@@ -52,7 +52,7 @@ typedef int8_t WebConfigStatus;
 #include "WebConfigOTA.h"
 
 // FTP server
-#include <ESP8266FtpServer.h>
+#include <FTPServer.h>
 
 // NTP
 #include <time.h>                         // time() ctime()
@@ -154,7 +154,7 @@ public:
     String user;
     String password;
   };
-  FtpServer ftpSrv;
+  FTPServer ftpSrv;
 
 
   struct DeepSleep {
