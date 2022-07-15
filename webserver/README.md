@@ -1,5 +1,7 @@
 # Webserver
 
+To update/install the local node_modules run `npm install`
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.1.7.
 
 ## Development server

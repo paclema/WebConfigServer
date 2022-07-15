@@ -203,6 +203,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
             // if (typeof(msg) == "string") {
             //     this.dashboardData = JSON.parse(msg);
             // }
+
+            // var str;
+            // if (typeof(msg) == "string")  console.log("STRING");
+            // else if (typeof(msg) == "number") console.log("NUMBER");
+            // else if(typeof(msg) == "object") {
+            //   str = JSON.stringify(msg);
+            //   console.log("OBJECT");
+            // }
+            // else { 
+            //   console.log("FORMAT:");
+            //   console.log(typeof(msg));
+            // }
+            
+            if(typeof(msg) == "object") console.log('message received: ' + JSON.stringify(msg));
+            else console.log('message received: ' + msg);
+            
+            // msg contains the whole JSON sent by WS, an example using WebConfigServer basic example:  msg = {"heap_free":76.04,"loop":6,"RSSI":-29}
+
                this.dashboardData = msg;
    
                // Update Chart line points:
