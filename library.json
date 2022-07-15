@@ -64,9 +64,9 @@
       "platforms": ["espressif8266", "espressif32"]
     },
     {
-      "name": "ESP8266FtpServer",
-      "owner": "nailbuster",
-      "version": "https://github.com/nailbuster/esp8266FTPServer",
+      "name": "FTP",
+      "owner": "dplasa",
+      "version": "https://github.com/dplasa/FTPClientServer",
       "platforms": "*"
     },
     {
