@@ -155,6 +155,9 @@ public:
     String password;
   };
   FTPServer ftpSrv;
+  size_t totalBytes;
+  size_t usedBytes;
+  size_t freeBytes;
 
 
   struct DeepSleep {
@@ -230,6 +233,24 @@ public:
   String getDeviceTopic(void) { return mqtt.getBaseTopic(); }
   unsigned long getDeviceSetupTime(void) {return deviceSetupTime; }
   bool getTimeSet(void) {return cbtime_set; }
+
+  void updateSizeSPIFFS(bool print = false){
+    totalBytes = SPIFFS.totalBytes();
+    usedBytes = SPIFFS.usedBytes();
+    freeBytes  = totalBytes - usedBytes ;
+    if(print){
+      Serial.println("File system memory size: ");
+      Serial.print("Total: ");
+      Serial.println(formatBytes(totalBytes));
+      Serial.print("Used: ");
+      Serial.println(formatBytes(usedBytes));
+      Serial.print("Available: ");
+      Serial.println(formatBytes(freeBytes));
+    }
+  };
+  String getTotalBytes(){return formatBytes(totalBytes);}
+  String getUsedBytess(){return formatBytes(usedBytes);}
+  String getFreeBytes(){return formatBytes(freeBytes);}
 
   void setPreSleepRoutine(void (*routine)()) { 
     this->preSleep_routine = routine; 

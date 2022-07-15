@@ -29,6 +29,7 @@ bool WebConfigServer::initWebConfigs(void){
     return false;
   } else {
     Serial.println("SPIFFS Mount succesfull");
+    WebConfigServer::updateSizeSPIFFS(true);
     File root = SPIFFS.open("/");
     File file = root.openNextFile();
     while (file) {
@@ -56,6 +57,7 @@ bool WebConfigServer::initWebConfigs(void){
       return false;
     } else {
       Serial.println("SPIFFS Mount succesfull");
+      WebConfigServer::updateSizeSPIFFS(true);
       Dir dir = SPIFFS.openDir("/");
       while (dir.next()) {
         String fileName = dir.fileName();
@@ -1335,7 +1337,9 @@ String WebConfigServer::getContentType(String filename) {
 
 void WebConfigServer::loop(void){
 
+  // Update internal variables:
   currentLoopMillis = millis();
+  WebConfigServer::updateSizeSPIFFS(false);
 
   if (!deviceSetupDone) {
     deviceSetupTime = currentLoopMillis;
