@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #ifdef ESP32
-  #include <SPIFFS.h>
+  #include <LittleFS.h>
 #elif defined(ESP8266)
   #include <FS.h>
 #endif
@@ -29,7 +29,7 @@ public:
     // serializeJsonPretty(newConfigObject, Serial);
     // Serial.println();
 
-    File fileIn = SPIFFS.open(CONFIG_FILE, "r");
+    File fileIn = LittleFS.open(CONFIG_FILE, "r");
     DynamicJsonDocument doc(CONFIG_JSON_SIZE);
     DeserializationError error = deserializeJson(doc, fileIn);
     if (error) {
@@ -71,8 +71,8 @@ public:
       // Serial.println();
     }
     
-    SPIFFS.remove(CONFIG_FILE);
-    File fileOut = SPIFFS.open(CONFIG_FILE, "w");
+    LittleFS.remove(CONFIG_FILE);
+    File fileOut = LittleFS.open(CONFIG_FILE, "w");
     if (!fileOut) {
       Serial.printf("Failed to open %s", CONFIG_FILE);
       return false;

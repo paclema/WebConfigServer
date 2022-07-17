@@ -7,7 +7,7 @@ void WebConfigMQTT::setup(void){
     // Load certificate file:
     // But you must convert it to .der
     // openssl x509 -in ./certs/IoLed_controller/client.crt -out ./certs/IoLed_controller/cert.der -outform DER
-    File cert = SPIFFS.open(cert_file, "r"); //replace cert.crt with your uploaded file name
+    File cert = LittleFS.open(cert_file, "r"); //replace cert.crt with your uploaded file name
     if (!cert) Serial.println("Failed to open cert file ");
     else Serial.println("Success to open cert file");
 
@@ -18,7 +18,7 @@ void WebConfigMQTT::setup(void){
     // Load private key:
     // But you must convert it to .der
     // openssl rsa -in ./certs/IoLed_controller/client.key -out ./certs/IoLed_controller/private.der -outform DER
-    File private_key = SPIFFS.open(key_file, "r");
+    File private_key = LittleFS.open(key_file, "r");
     if (!private_key) Serial.println("Failed to open key file ");
     else Serial.println("Success to open key file");
 
@@ -27,7 +27,7 @@ void WebConfigMQTT::setup(void){
     private_key.close();
 
     // Load CA file:
-    File ca = SPIFFS.open(ca_file, "r");
+    File ca = LittleFS.open(ca_file, "r");
     if (!ca) Serial.println("Failed to open CA file ");
     else Serial.println("Success to open CA file");
 

@@ -72,7 +72,7 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
 
 // Web server
 #ifdef ESP32
-  #include <SPIFFS.h>
+  #include <LittleFS.h>
   #ifdef USE_ASYNC_WEBSERVER
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
@@ -234,9 +234,9 @@ public:
   unsigned long getDeviceSetupTime(void) {return deviceSetupTime; }
   bool getTimeSet(void) {return cbtime_set; }
 
-  void updateSizeSPIFFS(bool print = false){
-    totalBytes = SPIFFS.totalBytes();
-    usedBytes = SPIFFS.usedBytes();
+  void updateSizeLittleFS(bool print = false){
+    totalBytes = LittleFS.totalBytes();
+    usedBytes = LittleFS.usedBytes();
     freeBytes  = totalBytes - usedBytes ;
     if(print){
       Serial.println("File system memory size: ");

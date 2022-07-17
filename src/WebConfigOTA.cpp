@@ -18,7 +18,7 @@ void WebConfigOTA::init(void) {
 
   ArduinoOTA.begin();
   ArduinoOTA.onStart([]() {
-    SPIFFS.end();
+    LittleFS.end();
     Serial.println("\n OTA update started... ");
   });
 
