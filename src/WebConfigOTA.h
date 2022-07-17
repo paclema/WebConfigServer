@@ -9,7 +9,7 @@
 #include "IWebConfig.h"
 
 #ifdef ESP32
-  #include <SPIFFS.h>
+  #include <LittleFS.h>
 #elif defined(ESP8266)
   #include <FS.h>
 #endif
