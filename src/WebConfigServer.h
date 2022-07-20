@@ -234,6 +234,7 @@ public:
   unsigned long getDeviceSetupTime(void) {return deviceSetupTime; }
   bool getTimeSet(void) {return cbtime_set; }
 
+  String formatBytes(size_t bytes);
   void updateSizeSPIFFS(bool print = false){
     totalBytes = SPIFFS.totalBytes();
     usedBytes = SPIFFS.usedBytes();
@@ -304,7 +305,6 @@ private:
 
   void enableServices(void);
   
-  String formatBytes(size_t bytes);
 
   bool saveWebConfigurationFile(const char *filename, const JsonDocument& doc);
   void parseConfig(const JsonDocument& doc);
