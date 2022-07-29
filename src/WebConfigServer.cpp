@@ -1339,7 +1339,7 @@ void WebConfigServer::loop(void){
 
   // Update internal variables:
   currentLoopMillis = millis();
-  WebConfigServer::updateSizeLittleFS(false);
+  // WebConfigServer::updateSizeLittleFS(false);
 
   if (!deviceSetupDone) {
     deviceSetupTime = currentLoopMillis;
