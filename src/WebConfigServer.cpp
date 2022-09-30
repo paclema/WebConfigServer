@@ -2,7 +2,7 @@
 
 
 WebConfigServer::WebConfigServer(void): 
-  ftpSrv(SPIFFS) {
+  ftpSrv(LittleFS) {
   config_status = CONFIG_NOT_LOADED;
 
   #ifdef USE_ASYNC_WEBSERVER
@@ -23,14 +23,14 @@ WebConfigServer::WebConfigServer(void):
 bool WebConfigServer::initWebConfigs(void){
 
   #ifdef ESP32
-  if (!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS Mount failed");
+  if (!LittleFS.begin(false)) {
+    Serial.println("LittleFS Mount failed");
     config_status = CONFIG_NOT_LOADED;
     return false;
   } else {
-    Serial.println("SPIFFS Mount succesfull");
-    WebConfigServer::updateSizeSPIFFS(true);
-    File root = SPIFFS.open("/");
+    Serial.println("LittleFS Mount succesfull");
+    WebConfigServer::updateSizeLittleFS(true);
+    File root = LittleFS.open("/");
     File file = root.openNextFile();
     while (file) {
       String fileName = file.name();
@@ -38,7 +38,7 @@ bool WebConfigServer::initWebConfigs(void){
       Serial.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
       file = root.openNextFile();
     }
-    if (SPIFFS.exists(CONFIG_FILE)) {
+    if (LittleFS.exists(CONFIG_FILE)) {
       Serial.println(); Serial.print(CONFIG_FILE); Serial.println(" exists!");
       loadConfigurationFile(CONFIG_FILE);
       // printFile(CONFIG_FILE);
@@ -51,21 +51,21 @@ bool WebConfigServer::initWebConfigs(void){
   }
 
   #elif defined(ESP8266)
-    if (!SPIFFS.begin()) {
-      Serial.println("SPIFFS Mount failed");
+    if (!LittleFS.begin()) {
+      Serial.println("LittleFS Mount failed");
       config_status = CONFIG_NOT_LOADED;
       return false;
     } else {
-      Serial.println("SPIFFS Mount succesfull");
-      WebConfigServer::updateSizeSPIFFS(true);
-      Dir dir = SPIFFS.openDir("/");
+      Serial.println("LittleFS Mount succesfull");
+      WebConfigServer::updateSizeLittleFS(true);
+      Dir dir = LittleFS.openDir("/");
       while (dir.next()) {
         String fileName = dir.fileName();
         size_t fileSize = dir.fileSize();
         Serial.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
       }
 
-      if (SPIFFS.exists(CONFIG_FILE)) {
+      if (LittleFS.exists(CONFIG_FILE)) {
         Serial.println(); Serial.print(CONFIG_FILE); Serial.println(" exists!");
         loadConfigurationFile(CONFIG_FILE);
         // printFile(CONFIG_FILE);
@@ -136,11 +136,11 @@ String WebConfigServer::formatBytes(size_t bytes){
 bool WebConfigServer::saveWebConfigurationFile(const char *filename, const JsonDocument& doc){
   // Delete existing file, otherwise the configuration is appended to the file
   Serial.print(F("Saving WebConfig file... "));
-  SPIFFS.remove(filename);
+  LittleFS.remove(filename);
 
   // Open file for writing
   // File file = SD.open(filename, FILE_WRITE);
-  File file = SPIFFS.open(filename, "w");
+  File file = LittleFS.open(filename, "w");
   if (!file) {
     Serial.println(F("Failed to create file"));
     return false;
@@ -357,7 +357,7 @@ void WebConfigServer::enableServices(void){
 // Loads the configuration from a file
 void WebConfigServer::loadConfigurationFile(const char *filename){
   // Open file for reading
-  File file = SPIFFS.open(filename, "r");
+  File file = LittleFS.open(filename, "r");
 
   // Allocate a temporary JsonDocument
   // Don't forget to change the capacity to match your requirements.
@@ -386,11 +386,11 @@ void WebConfigServer::loadConfigurationFile(const char *filename){
 // Saves the Config struct configuration to a file
 void WebConfigServer::saveConfigurationFile(const char *filename){
   // Delete existing file, otherwise the configuration is appended to the file
-  SPIFFS.remove(filename);
+  LittleFS.remove(filename);
 
   // Open file for writing
   // File file = SD.open(filename, FILE_WRITE);
-  File file = SPIFFS.open(filename, "w");
+  File file = LittleFS.open(filename, "w");
   if (!file) {
     Serial.println(F("Failed to create file"));
     return;
@@ -426,7 +426,7 @@ void WebConfigServer::saveConfigurationFile(const char *filename){
 // Prints the content of a file to the Serial
 void WebConfigServer::printFile(String filename){
   // Open file for reading
-  File file = SPIFFS.open(filename, "r");
+  File file = LittleFS.open(filename, "r");
   if (!file) {
     Serial.println(F("Failed to read file"));
     return;
@@ -451,16 +451,16 @@ bool WebConfigServer::restoreBackupFile(String filenamechar){
       String filename_bak =  "/.bak"+filename;
       Serial.print("Restoring backup for: "); Serial.println(filename);
       // Delete existing file, otherwise the configuration is appended to the file
-      SPIFFS.remove(filename);
+      LittleFS.remove(filename);
 
-      File file = SPIFFS.open(filename, "w+");
+      File file = LittleFS.open(filename, "w+");
       if (!file) {
         Serial.print(F("Failed to read file: "));Serial.println(filename);
         return false;
       }
 
       //Serial.print("Opened: "); Serial.println(filename);
-      File file_bak = SPIFFS.open(filename_bak, "r");
+      File file_bak = LittleFS.open(filename_bak, "r");
       if (!file) {
         Serial.print(F("Failed to read backup file: "));Serial.println(filename_bak);
         return false;
@@ -558,22 +558,22 @@ void WebConfigServer::updateGpio(AsyncWebServerRequest *request){
 void WebConfigServer::configureServer(){
 
   //list directory
-  // server->serveStatic("/certs", SPIFFS, "/certs");
-  // server->serveStatic("/img", SPIFFS, "/img");
-  // server->serveStatic("/", SPIFFS, "/index.html");
+  // server->serveStatic("/certs", LittleFS, "/certs");
+  // server->serveStatic("/img", LittleFS, "/img");
+  // server->serveStatic("/", LittleFS, "/index.html");
 
-  server->serveStatic("/config/config.json", SPIFFS, "/config/config.json");
-  server->serveStatic("/", SPIFFS, "/").setDefaultFile("index.html").setCacheControl("max-age=600");
-  // server->serveStatic("/", SPIFFS, "/");
-  server->serveStatic("/index.html", SPIFFS, "/index.html");
-  server->serveStatic("/main.js", SPIFFS, "/main.js");
-  server->serveStatic("/polyfills.js", SPIFFS, "/polyfills.js");
-  server->serveStatic("/runtime.js", SPIFFS, "/runtime.js");
-  server->serveStatic("/styles.css", SPIFFS, "/styles.css");
-  server->serveStatic("/scripts.js", SPIFFS, "/scripts.js");
-  server->serveStatic("/favicon.ico", SPIFFS, "/favicon.ico");
-  server->serveStatic("/chiplogo.png", SPIFFS, "/chiplogo.png");
-  // server->serveStatic("/3rdpartylicenses.txt", SPIFFS, "/3rdpartylicenses.txt");
+  server->serveStatic("/config/config.json", LittleFS, "/config/config.json");
+  server->serveStatic("/", LittleFS, "/").setDefaultFile("index.html").setCacheControl("max-age=600");
+  // server->serveStatic("/", LittleFS, "/");
+  server->serveStatic("/index.html", LittleFS, "/index.html");
+  server->serveStatic("/main.js", LittleFS, "/main.js");
+  server->serveStatic("/polyfills.js", LittleFS, "/polyfills.js");
+  server->serveStatic("/runtime.js", LittleFS, "/runtime.js");
+  server->serveStatic("/styles.css", LittleFS, "/styles.css");
+  server->serveStatic("/scripts.js", LittleFS, "/scripts.js");
+  server->serveStatic("/favicon.ico", LittleFS, "/favicon.ico");
+  server->serveStatic("/chiplogo.png", LittleFS, "/chiplogo.png");
+  // server->serveStatic("/3rdpartylicenses.txt", LittleFS, "/3rdpartylicenses.txt");
 
 
 
@@ -679,7 +679,7 @@ void WebConfigServer::configureServer(){
         // If not, the 200 response won't be sent properly.
         // delay(150);    // Delays will not take place under Asyc WebServer
         WiFi.disconnect();
-        SPIFFS.end();
+        LittleFS.end();
         ESP.restart();
       }
     }
@@ -736,15 +736,15 @@ void WebConfigServer::handleUpload(AsyncWebServerRequest *request, String filena
 	if (!index) {
     // For the first chunk we open the file to override it
 		// Serial.printf("UploadStart: %s\n", filename.c_str());
-    file = SPIFFS.open(filename, "w");
+    file = LittleFS.open(filename, "w");
 	} else{
     // The rest of the chunks we apend them into the file
-    file = SPIFFS.open(filename, "a");
+    file = LittleFS.open(filename, "a");
   }
 
   size_t writeSize = file.write(data,len);
   // Serial.printf("File index: %u B- size: %u B - wrote: %u B\n", index, len, writeSize);
-  // Serial.printf("SPIFFS totalBytes: %u B- usedBytes: %u B\n",  SPIFFS.totalBytes(), SPIFFS.usedBytes());
+  // Serial.printf("LittleFS totalBytes: %u B- usedBytes: %u B\n",  LittleFS.totalBytes(), LittleFS.usedBytes());
 
   if( writeSize != len){
     Serial.printf("Error writing the next file chunk. Index: %u B - size: %u B - wrote: %u B\n", index, len, writeSize);
@@ -780,17 +780,17 @@ bool WebConfigServer::handleFileRead(AsyncWebServerRequest *request, String path
   String contentType = getContentType(path);
   String pathWithGz = path + ".gz";
   // If the file exists, either as a compressed archive, or normal
-  if(SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
+  if(LittleFS.exists(pathWithGz) || LittleFS.exists(path)){
     // If there's a compressed version available use it
     bool gzipContent = false;
-    if(SPIFFS.exists(pathWithGz)){
+    if(LittleFS.exists(pathWithGz)){
       path += ".gz";
       gzipContent = true;
     }
     // Open the file and send it to the client
-    File file = SPIFFS.open(path, "r");
+    File file = LittleFS.open(path, "r");
     // size_t sent_size = server->streamFile(file, contentType);
-    AsyncWebServerResponse *response = request->beginResponse(SPIFFS, path, contentType);
+    AsyncWebServerResponse *response = request->beginResponse(LittleFS, path, contentType);
     if(gzipContent) response->addHeader("Content-Encoding", "gzip");
     request->send(response);
     file.close();
@@ -865,18 +865,18 @@ void WebConfigServer::configureServer(){
 
   //SERVER INIT
   //list directory
-  // server->serveStatic("/config/config.json", SPIFFS, "/config/config.json");
-  // server->serveStatic("/certs", SPIFFS, "/certs.gz");
-  // server->serveStatic("/img", SPIFFS, "/img.gz");
-  // server->serveStatic("/", SPIFFS, "/index.html.gz");
-  // server->serveStatic("/main.js", SPIFFS, "/main.js.gz");
-  // server->serveStatic("/polyfills.js", SPIFFS, "/polyfills.js.gz");
-  // server->serveStatic("/runtime.js", SPIFFS, "/runtime.js.gz");
-  // server->serveStatic("/styles.css", SPIFFS, "/styles.css.gz");
-  // server->serveStatic("/scripts.js", SPIFFS, "/scripts.js.gz");
-  // server->serveStatic("/3rdpartylicenses.txt", SPIFFS, "/3rdpartylicenses.txt.gz");
-  // server->serveStatic("/favicon.ico", SPIFFS, "/favicon.ico.gz");
-  // server->serveStatic("/", SPIFFS, "/");
+  // server->serveStatic("/config/config.json", LittleFS, "/config/config.json");
+  // server->serveStatic("/certs", LittleFS, "/certs.gz");
+  // server->serveStatic("/img", LittleFS, "/img.gz");
+  // server->serveStatic("/", LittleFS, "/index.html.gz");
+  // server->serveStatic("/main.js", LittleFS, "/main.js.gz");
+  // server->serveStatic("/polyfills.js", LittleFS, "/polyfills.js.gz");
+  // server->serveStatic("/runtime.js", LittleFS, "/runtime.js.gz");
+  // server->serveStatic("/styles.css", LittleFS, "/styles.css.gz");
+  // server->serveStatic("/scripts.js", LittleFS, "/scripts.js.gz");
+  // server->serveStatic("/3rdpartylicenses.txt", LittleFS, "/3rdpartylicenses.txt.gz");
+  // server->serveStatic("/favicon.ico", LittleFS, "/favicon.ico.gz");
+  // server->serveStatic("/", LittleFS, "/");
 
 
   server->on("/gpio", HTTP_POST, [&, this](){
@@ -947,7 +947,7 @@ void WebConfigServer::configureServer(){
         server->close();
         server->stop();
         WiFi.disconnect();
-        SPIFFS.end();
+        LittleFS.end();
         ESP.restart();
       }
       server->send ( 200, "text/json", "{\"message\": \"Device restarted\"}" );
@@ -980,7 +980,7 @@ void WebConfigServer::configureServer(){
         Serial.printf("UploadStart: %s\n", upload.filename.c_str());
 
         // For the first chunk we open the file to override it
-        file = SPIFFS.open(upload.filename, "w");
+        file = LittleFS.open(upload.filename, "w");
       if(!file){
         Serial.println("- failed to open file for writing");
         return;
@@ -990,7 +990,7 @@ void WebConfigServer::configureServer(){
     if(upload.status == UPLOAD_FILE_WRITE){
 
       // The rest of the chunks we apend them into the file
-      file = SPIFFS.open(upload.filename, "a");
+      file = LittleFS.open(upload.filename, "a");
       size_t writeSize = file.write(upload.buf,upload.currentSize);
       if( writeSize != upload.currentSize){
         // Serial.printf("Error writing the next file chunk. Index: %u B - size: %u B - wrote: %u B\n", index, len, writeSize);
@@ -1003,11 +1003,11 @@ void WebConfigServer::configureServer(){
       } else {
           // Serial.printf("Total size: %u B - currentSize: %u B- wrote: %u B\n", upload.totalSize, upload.currentSize, writeSize);
           // For ESP32:
-          // Serial.printf("SPIFFS totalBytes: %u B- usedBytes: %u B\n",  SPIFFS.totalBytes(), SPIFFS.usedBytes());
+          // Serial.printf("LittleFS totalBytes: %u B- usedBytes: %u B\n",  LittleFS.totalBytes(), LittleFS.usedBytes());
           // For ESP8266
           // FSInfo fs_info;
-          // SPIFFS.info(fs_info);
-          // Serial.printf("SPIFFS totalBytes: %u B- usedBytes: %u B\n",  fs_info.totalBytes, fs_info.usedBytes);
+          // LittleFS.info(fs_info);
+          // Serial.printf("LittleFS totalBytes: %u B- usedBytes: %u B\n",  fs_info.totalBytes, fs_info.usedBytes);
       }
 
     } else if(upload.status == UPLOAD_FILE_END){
@@ -1046,12 +1046,12 @@ bool WebConfigServer::handleFileRead(WebServer *server, String path) {
   String contentType = getContentType(path);
   String pathWithGz = path + ".gz";
   // If the file exists, either as a compressed archive, or normal
-  if(SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
+  if(LittleFS.exists(pathWithGz) || LittleFS.exists(path)){
     // If there's a compressed version available use it
-    if(SPIFFS.exists(pathWithGz))
+    if(LittleFS.exists(pathWithGz))
       path += ".gz";
     // Open the file and send it to the client
-    File file = SPIFFS.open(path, "r");
+    File file = LittleFS.open(path, "r");
     size_t sent_size = server->streamFile(file, contentType);
     file.close();
     Serial.println(String("\tSent file: ") + path + String(" - ") + formatBytes(sent_size));
@@ -1123,18 +1123,18 @@ void WebConfigServer::configureServer(){
 
   //SERVER INIT
   //list directory
-  // server->serveStatic("/config/config.json", SPIFFS, "/config/config.json");
-  // server->serveStatic("/certs", SPIFFS, "/certs.gz");
-  // server->serveStatic("/img", SPIFFS, "/img.gz");
-  // server->serveStatic("/", SPIFFS, "/index.html.gz");
-  // server->serveStatic("/main.js", SPIFFS, "/main.js.gz");
-  // server->serveStatic("/polyfills.js", SPIFFS, "/polyfills.js.gz");
-  // server->serveStatic("/runtime.js", SPIFFS, "/runtime.js.gz");
-  // server->serveStatic("/styles.css", SPIFFS, "/styles.css.gz");
-  // server->serveStatic("/scripts.js", SPIFFS, "/scripts.js.gz");
-  // server->serveStatic("/3rdpartylicenses.txt", SPIFFS, "/3rdpartylicenses.txt.gz");
-  // server->serveStatic("/favicon.ico", SPIFFS, "/favicon.ico.gz");
-  // server->serveStatic("/", SPIFFS, "/");
+  // server->serveStatic("/config/config.json", LittleFS, "/config/config.json");
+  // server->serveStatic("/certs", LittleFS, "/certs.gz");
+  // server->serveStatic("/img", LittleFS, "/img.gz");
+  // server->serveStatic("/", LittleFS, "/index.html.gz");
+  // server->serveStatic("/main.js", LittleFS, "/main.js.gz");
+  // server->serveStatic("/polyfills.js", LittleFS, "/polyfills.js.gz");
+  // server->serveStatic("/runtime.js", LittleFS, "/runtime.js.gz");
+  // server->serveStatic("/styles.css", LittleFS, "/styles.css.gz");
+  // server->serveStatic("/scripts.js", LittleFS, "/scripts.js.gz");
+  // server->serveStatic("/3rdpartylicenses.txt", LittleFS, "/3rdpartylicenses.txt.gz");
+  // server->serveStatic("/favicon.ico", LittleFS, "/favicon.ico.gz");
+  // server->serveStatic("/", LittleFS, "/");
 
 
   server->on("/gpio", HTTP_POST, [& ,this](){
@@ -1202,7 +1202,7 @@ void WebConfigServer::configureServer(){
         server->close();
         server->stop();
         WiFi.disconnect();
-        SPIFFS.end();
+        LittleFS.end();
         ESP.restart();
       }
       server->send ( 200, "text/json", "{\"message\": \"Device restarted\"}" );
@@ -1236,7 +1236,7 @@ void WebConfigServer::configureServer(){
         Serial.printf("UploadStart: %s\n", upload.filename.c_str());
 
         // For the first chunk we open the file to override it
-        file = SPIFFS.open(upload.filename, "w");
+        file = LittleFS.open(upload.filename, "w");
       if(!file){
         Serial.println("- failed to open file for writing");
         return;
@@ -1246,7 +1246,7 @@ void WebConfigServer::configureServer(){
     if(upload.status == UPLOAD_FILE_WRITE){
 
       // The rest of the chunks we apend them into the file
-      file = SPIFFS.open(upload.filename, "a");
+      file = LittleFS.open(upload.filename, "a");
       size_t writeSize = file.write(upload.buf,upload.currentSize);
       if( writeSize != upload.currentSize){
         // Serial.printf("Error writing the next file chunk. Index: %u B - size: %u B - wrote: %u B\n", index, len, writeSize);
@@ -1259,8 +1259,8 @@ void WebConfigServer::configureServer(){
       } else {
           // Serial.printf("Total size: %u B - currentSize: %u B- wrote: %u B\n", upload.totalSize, upload.currentSize, writeSize);
           // FSInfo fs_info;
-          // SPIFFS.info(fs_info);
-          // Serial.printf("SPIFFS totalBytes: %u B- usedBytes: %u B\n",  fs_info.totalBytes, fs_info.usedBytes);
+          // LittleFS.info(fs_info);
+          // Serial.printf("LittleFS totalBytes: %u B- usedBytes: %u B\n",  fs_info.totalBytes, fs_info.usedBytes);
       }
 
     } else if(upload.status == UPLOAD_FILE_END){
@@ -1298,12 +1298,12 @@ bool WebConfigServer::handleFileRead(ESP8266WebServer *server, String path) {
   String contentType = getContentType(path);
   String pathWithGz = path + ".gz";
   // If the file exists, either as a compressed archive, or normal
-  if(SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
+  if(LittleFS.exists(pathWithGz) || LittleFS.exists(path)){
     // If there's a compressed version available use it
-    if(SPIFFS.exists(pathWithGz))
+    if(LittleFS.exists(pathWithGz))
       path += ".gz";
     // Open the file and send it to the client
-    File file = SPIFFS.open(path, "r");
+    File file = LittleFS.open(path, "r");
     size_t sent_size = server->streamFile(file, contentType);
     file.close();
     Serial.println(String("\tSent file: ") + path + String(" - ") + formatBytes(sent_size));
@@ -1339,7 +1339,7 @@ void WebConfigServer::loop(void){
 
   // Update internal variables:
   currentLoopMillis = millis();
-  WebConfigServer::updateSizeSPIFFS(false);
+  // WebConfigServer::updateSizeLittleFS(false);
 
   if (!deviceSetupDone) {
     deviceSetupTime = currentLoopMillis;
