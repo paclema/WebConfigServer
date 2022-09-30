@@ -77,7 +77,7 @@ public:
       Serial.printf("Failed to open %s", CONFIG_FILE);
       return false;
     }
-    if (serializeJson(doc, fileOut) == 0) {
+    if (serializeJsonPretty(doc, fileOut) == 0) {
       Serial.printf("Failed to write %s", CONFIG_FILE);
       return false;
     }

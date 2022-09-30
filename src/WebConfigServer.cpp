@@ -147,7 +147,7 @@ bool WebConfigServer::saveWebConfigurationFile(const char *filename, const JsonD
   }
 
   // Serialize JSON to file
-  if (serializeJson(doc, file) == 0) {
+  if (serializeJsonPretty(doc, file) == 0) {
     Serial.println(F("Failed to write to file"));
     return false;
   }
