@@ -17,6 +17,8 @@
   "mqtt": {
     "enabled": false,
     "reconnect_mqtt": false,
+    "reconnect_retries": -1,
+    "reconnect_time_ms": 10000,
     "server": "broker.ddns.net",
     "port": 1883,
     "id_name": "iot-button",

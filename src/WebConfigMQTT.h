@@ -29,9 +29,7 @@ private:
   PubSubClient mqttClient;
 
   unsigned long previousMqttReconnectionMillis = millis();
-  unsigned int mqttReconnectionTime = 10000;
   int mqttRetries = 0;
-  int mqttMaxRetries = 10;
 
   unsigned long currentLoopMillis = 0;
   unsigned long previousMQTTPublishMillis = 0;
@@ -44,6 +42,8 @@ private:
   String id_name;
   String base_topic_pub;
   bool reconnect_mqtt;
+  int mqttMaxRetries;
+  unsigned int mqttReconnectionTime;
   bool enable_user_and_pass;
   String user_name;
   String user_password;

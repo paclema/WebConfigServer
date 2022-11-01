@@ -69,7 +69,7 @@ void WebConfigMQTT::reconnect() {
   // Loop until we're reconnected
   if (currentLoopMillis - previousMqttReconnectionMillis > mqttReconnectionTime){
     mqttClient.disconnect();
-    if (!mqttClient.connected() && (mqttRetries <= mqttMaxRetries) ) {
+    if (!mqttClient.connected() && ( mqttMaxRetries <= 0 || (mqttRetries <= mqttMaxRetries)) ) {
       bool mqttConnected = false;
       Serial.print("Attempting MQTT connection... ");
       String mqttWillTopic = base_topic_pub + "connected";
@@ -109,22 +109,13 @@ void WebConfigMQTT::reconnect() {
               mqttClient.subscribe(sub_topic[i].c_str()) ? "ok" : "failed");
         }
 
-        long time_now = millis() - connectionTime;
         mqttRetries = 0;
-        Serial.print("Time to connect MQTT client: ");
-        Serial.print((float)time_now/1000);
-        Serial.println("s");
+        Serial.printf("Time to connect MQTT client: %.2fs\n",(float)(millis() - connectionTime)/1000);
 
       } else {
-        Serial.print("failed, rc=");
-        Serial.print(mqttClient.state());
-        Serial.print(" try again in ");
-        Serial.print(mqttReconnectionTime/1000);
-        Serial.print("s: ");
-        Serial.print(mqttRetries);
-        Serial.print("/");
-        Serial.println(mqttMaxRetries);
-
+        Serial.printf("failed, rc=%d try again in %ds: %d/%s\n", 
+                        mqttClient.state(), mqttReconnectionTime/1000, mqttRetries, 
+                        mqttMaxRetries <= 0 ? "-" : String(mqttMaxRetries));
       }
       previousMqttReconnectionMillis = millis();
       mqttRetries++;
@@ -159,6 +150,8 @@ void WebConfigMQTT::parseWebConfig(JsonObjectConst configObject){
   this->port = configObject["port"] | 8888;
   this->id_name = configObject["id_name"] | "iotdevice";
   this->reconnect_mqtt = configObject["reconnect_mqtt"] | false;
+  this->mqttMaxRetries = configObject["reconnect_retries"] | 10;
+  this->mqttReconnectionTime = configObject["reconnect_time_ms"] | 10000;
   this->enable_user_and_pass = configObject["enable_user_and_pass"] | false;
   this->user_name = configObject["user_name"] | "user_name";
   this->user_password = configObject["user_password"] | "user_password";
