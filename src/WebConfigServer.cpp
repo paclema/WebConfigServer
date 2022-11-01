@@ -1361,7 +1361,7 @@ void WebConfigServer::loop(void){
 
   // Handle mqtt reconnection:
   if (mqtt.isEnabled()) {
-    if (mqtt.getReconnect() && !mqtt.isConnected()) mqtt.reconnect();
+    if (mqtt.getReconnect() && !mqtt.isConnected() && WiFi.status() == WL_CONNECTED) mqtt.reconnect();
     mqtt.loop();
   }
 
@@ -1405,6 +1405,8 @@ void WebConfigServer::networkRestart(void){
 
     // WiFi setup:
     // WiFi.disconnect(true);        // close old connections
+    if (mqtt.isConnected() ) mqtt.disconnect();
+    
     #ifdef ESP32
       WiFi.setHostname(network.hostname.c_str());
       WiFi.mode(WIFI_MODE_APSTA);

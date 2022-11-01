@@ -62,6 +62,7 @@ public:
 
   void setup(void);
   void reconnect(void);
+  void disconnect(void){ mqttClient.disconnect(); }
   void loop(void);
 
   bool isEnabled(void) { return enabled; }
