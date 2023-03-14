@@ -13,8 +13,10 @@ WebConfigServer::WebConfigServer(void):
     server = new ESP8266WebServer(80);
   #endif
 
-  // Setup internal configs:
+  // Setup internal configs:´
+  #ifndef DISABLE_WEBCONFIG_MQTT
   WebConfigServer::addConfig(mqtt, "mqtt");
+  #endif
   WebConfigServer::addConfigService(services.ota, "OTA");
   WebConfigServer::addConfigService(services.webSockets, "WebSockets");
 }
@@ -108,10 +110,12 @@ bool WebConfigServer::begin(void){
   WebConfigServer::enableServices();
 
   // Setup MQTT:
+  #ifndef DISABLE_WEBCONFIG_MQTT
   if (mqtt.isEnabled()) {
     mqtt.setup();
     if (mqtt.getReconnect()) mqtt.reconnect();
   }
+  #endif
 
   return true;
 
@@ -183,7 +187,9 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
 
 
   // MQTT object:
+  #ifndef DISABLE_WEBCONFIG_MQTT
   mqtt.setPublishTime(doc["device"]["publish_time_ms"]);
+  #endif
 
 
   // Services object:
@@ -406,8 +412,10 @@ void WebConfigServer::saveConfigurationFile(const char *filename){
   doc["network"]["ssid_password"] = network.ssid_password;
 
   // MQTT object:
+  #ifndef DISABLE_WEBCONFIG_MQTT    
   // doc["mqtt"]["server"] = mqtt.server;
   // doc["mqtt"]["port"] = mqtt.port;
+  #endif
 
   // Services object:
   // doc["services"]["FTP"] = mqtt.server;
@@ -1360,10 +1368,12 @@ void WebConfigServer::loop(void){
   #endif
 
   // Handle mqtt reconnection:
+  #ifndef DISABLE_WEBCONFIG_MQTT
   if (mqtt.isEnabled()) {
     if (mqtt.getReconnect() && !mqtt.isConnected() && WiFi.status() == WL_CONNECTED) mqtt.reconnect();
     mqtt.loop();
   }
+  #endif
 
   // Services loop:
   if (services.ota.isEnabled()) services.ota.handle();
@@ -1405,7 +1415,9 @@ void WebConfigServer::networkRestart(void){
 
     // WiFi setup:
     // WiFi.disconnect(true);        // close old connections
+    #ifndef DISABLE_WEBCONFIG_MQTT
     if (mqtt.isConnected() ) mqtt.disconnect();
+    #endif
     
     #ifdef ESP32
       WiFi.setHostname(network.hostname.c_str());

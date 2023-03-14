@@ -45,8 +45,10 @@ typedef int8_t WebConfigStatus;
 
 
 // MQTT
+#ifndef DISABLE_WEBCONFIG_MQTT
 #include <PubSubClient.h>
 #include "WebConfigMQTT.h"
+#endif
 
 // WebConfigOTA
 #include "WebConfigOTA.h"
@@ -147,7 +149,9 @@ public:
     bool enable_NAT;
   } network;
 
+#ifndef DISABLE_WEBCONFIG_MQTT
   WebConfigMQTT mqtt;
+#endif
 
   struct FTP {
     bool enabled;
@@ -228,9 +232,12 @@ public:
   void addConfig(IWebConfig& config, String nameObject);
   void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
 
+#ifndef DISABLE_WEBCONFIG_MQTT
   PubSubClient *getMQTTClient(void) { return mqtt.getMQTTClient(); }
   void setMQTTClientId(String client_id) { mqtt.setMQTTClientId(client_id); }
   String getDeviceTopic(void) { return mqtt.getBaseTopic(); }
+#endif
+
   unsigned long getDeviceSetupTime(void) {return deviceSetupTime; }
   bool getTimeSet(void) {return cbtime_set; }
 
