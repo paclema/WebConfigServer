@@ -4,9 +4,12 @@ void WebConfigMQTT::setup(void){
 
 
   if (enable_certificates){
+
+  #ifdef ESP32
     // Load certificate file:
     // But you must convert it to .der
     // openssl x509 -in ./certs/IoLed_controller/client.crt -out ./certs/IoLed_controller/cert.der -outform DER
+
     File cert = LittleFS.open(cert_file, "r"); //replace cert.crt with your uploaded file name
     if (!cert) Serial.println("Failed to open cert file ");
     else Serial.println("Success to open cert file");
@@ -34,6 +37,62 @@ void WebConfigMQTT::setup(void){
     if (wifiClientSecure.loadCACert(ca, ca.size())) Serial.println("CA loaded");
     else Serial.println("CA not loaded");
     ca.close();
+
+  #elif defined(ESP8266)
+
+    // Cert FIle
+    File cert = LittleFS.open(cert_file, "r");
+    if(!cert) Serial.println("Couldn't load cert");
+    else {
+      size_t certSize = cert.size();
+      client_cert = (char *)malloc(certSize);
+      if (certSize != cert.readBytes(client_cert, certSize)) {
+        Serial.println("Loading client cert failed");
+      } else {
+        Serial.println("Loaded client cert");
+        clientCert = new BearSSL::X509List(client_cert);
+      }
+      free(client_cert);
+      cert.close();
+    }
+
+    // Key File
+    File key = LittleFS.open(key_file, "r");
+    if(!key) Serial.println("Couldn't load key");
+    else {
+      size_t keySize = key.size();
+      client_key = (char *)malloc(keySize);
+      if (keySize != key.readBytes(client_key, keySize)) {
+        Serial.println("Loading key failed");
+      } else {
+        Serial.println("Loaded key");
+        clientKey = new BearSSL::PrivateKey(client_key);
+      }
+      free(client_key);
+      key.close();
+    }
+
+    wifiClientSecure.setClientRSACert(clientCert, clientKey);
+
+    // CA File
+    File ca = LittleFS.open(ca_file, "r");
+    if(!ca) Serial.println("Couldn't load CA cert");
+    else {
+      size_t certSize = ca.size();
+      ca_cert = (char *)malloc(certSize);
+      if (certSize != ca.readBytes(ca_cert, certSize)) {
+        Serial.println("Loading CA cert failed");
+      } else {
+        Serial.println("Loaded CA cert");
+        rootCert = new BearSSL::X509List(ca_cert);
+        wifiClientSecure.setTrustAnchors(rootCert);
+      }
+      free(ca_cert);
+      ca.close();
+  }
+
+  #endif
+
   }
 
   if (enable_certificates){

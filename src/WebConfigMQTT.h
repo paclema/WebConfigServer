@@ -12,13 +12,24 @@
 
 #define MQTT_TOPIC_MAX_SIZE_LIST 10
 
-#include <LittleFS.h>
 
 class WebConfigMQTT: public IWebConfig{
 
 private:
-
+#ifdef ESP32
   WiFiClientSecure wifiClientSecure;
+#elif defined(ESP8266)
+  BearSSL::WiFiClientSecure wifiClientSecure;
+  
+  char *client_cert = nullptr;
+  char *client_key = nullptr;
+  char *ca_cert = nullptr;
+
+  BearSSL::X509List *rootCert;
+  BearSSL::X509List *clientCert;
+  BearSSL::PrivateKey *clientKey;
+#endif
+
   WiFiClient wifiClient;
   WebSocketClient  * wsClient;
   WebSocketStreamClient * wsStreamClient;
