@@ -5,14 +5,9 @@
 
 // OTA Includes
 #include <ArduinoOTA.h>
+#include <LittleFS.h>
 
 #include "IWebConfig.h"
-
-#ifdef ESP32
-  #include <LittleFS.h>
-#elif defined(ESP8266)
-  #include <FS.h>
-#endif
 
 class WebConfigOTA: public IWebConfig{
 

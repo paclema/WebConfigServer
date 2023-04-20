@@ -5,18 +5,14 @@
 
 #include "IWebConfig.h"
 
+#include <LittleFS.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 #include "WebSocketStreamClient.h"
 
 #define MQTT_TOPIC_MAX_SIZE_LIST 10
 
-#ifdef ESP32
-  #include <LittleFS.h>
-#elif defined(ESP8266)
-  #include <FS.h>
-#endif
-
+#include <LittleFS.h>
 
 class WebConfigMQTT: public IWebConfig{
 

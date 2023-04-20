@@ -73,8 +73,9 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
 
 
 // Web server
+#include <LittleFS.h>
+
 #ifdef ESP32
-  #include <LittleFS.h>
   #ifdef USE_ASYNC_WEBSERVER
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
@@ -84,8 +85,8 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
     #include <WebServer.h>
     #pragma message ( "WebConfig running NO Async WebServer for ESP32" )
   #endif
+
 #elif defined(ESP8266)
-  #include <FS.h>
   #ifdef USE_ASYNC_WEBSERVER
     #include <ESPAsyncTCP.h>
     #include <ESPAsyncWebServer.h>
@@ -243,8 +244,17 @@ public:
 
   String formatBytes(size_t bytes);
   void updateSizeLittleFS(bool print = false){
+
+    #ifdef ESP32
     totalBytes = LittleFS.totalBytes();
     usedBytes = LittleFS.usedBytes();
+    #elif defined(ESP8266)
+    FSInfo fs_info;
+    LittleFS.info(fs_info);
+    totalBytes = fs_info.totalBytes;
+    usedBytes = fs_info.usedBytes;
+    #endif
+
     freeBytes  = totalBytes - usedBytes ;
     if(print){
       Serial.println("File system memory size: ");

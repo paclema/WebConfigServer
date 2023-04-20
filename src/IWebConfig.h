@@ -3,11 +3,8 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#ifdef ESP32
-  #include <LittleFS.h>
-#elif defined(ESP8266)
-  #include <FS.h>
-#endif
+
+#include <LittleFS.h>
 
 #ifndef CONFIG_FILE
   #define CONFIG_FILE "/config/config.json"
