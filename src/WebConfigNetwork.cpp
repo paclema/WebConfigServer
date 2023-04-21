@@ -195,5 +195,5 @@ void WebConfigNetwork::parseWebConfig(JsonObjectConst configObject){
   this->hostname = configObject["hostname"] | "iotdevice.local";
   this->enable_NAT = configObject["enable_NAT"] | false;
 
-  serializeJsonPretty(configObject, Serial);
+  // serializeJsonPretty(configObject, Serial);
 };
