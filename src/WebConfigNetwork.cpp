@@ -1,5 +1,10 @@
 #include "WebConfigNetwork.h"
 
+WebConfigNetwork::WebConfigNetwork(WebConfigNetworkObserver* observer): 
+  networkObserver(observer) {
+
+}
+
 void WebConfigNetwork::restart(void){
 
   // WiFi setup:
@@ -38,6 +43,10 @@ void WebConfigNetwork::restart(void){
     if ((connection_retries != 0 && (retries <= connection_retries)) || connection_retries == 0) {
       Serial.print("\n\nConnected to ");Serial.print(WiFi.SSID());
       Serial.print("\nIP address:\t");Serial.println(WiFi.localIP());
+      
+      // TODO: change this call to be called into wifi event handler
+      networkObserver->onNetworkConnected();
+
     } else {Serial.print("\n\nNot Connected to ");Serial.print(ssid_name);Serial.println(" max retries reached.");}
 
   }

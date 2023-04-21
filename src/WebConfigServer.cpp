@@ -1,8 +1,9 @@
 #include "WebConfigServer.h"
 
 
-WebConfigServer::WebConfigServer(void): 
-  ftpSrv(LittleFS) {
+WebConfigServer::WebConfigServer(void):
+  ftpSrv(LittleFS),
+  network(this) {
   config_status = CONFIG_NOT_LOADED;
 
   #ifdef USE_ASYNC_WEBSERVER

@@ -26,10 +26,13 @@
   #include <ESP8266mDNS.h>
 #endif
 
-class WebConfigNetwork: public IWebConfig{
+#include "WebConfigNetworkObserver.h"
 
+
+class WebConfigNetwork: public IWebConfig {
+protected:
+  WebConfigNetworkObserver* networkObserver;
 private:
-
   String ap_name;
   String ap_password;
   int ap_channel;
@@ -57,9 +60,9 @@ private:
 
 
 public:
+  WebConfigNetwork(WebConfigNetworkObserver* observer);
 
   void restart(void);
-
   void loop(void);
 
   void parseWebConfig(JsonObjectConst configObject);

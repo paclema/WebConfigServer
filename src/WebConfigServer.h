@@ -103,13 +103,15 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
 
 // WiFi & Network
 #include "WebConfigNetwork.h"
+#include "WebConfigNetworkObserver.h"
 
 
 #include <ArduinoJson.h>
 
 
 
-class WebConfigServer {
+class WebConfigServer:
+    public WebConfigNetworkObserver {
 
 public:
 
@@ -313,6 +315,12 @@ private:
 
 
   String getContentType(String filename);
+
+  // WebConfigNetworkObserver
+  void onNetworkConnected() {
+    // TODO: start WebConfigServer here
+    Serial.println("WebConfigServer receives Network connected!");
+  }
 
 
 };
