@@ -318,8 +318,31 @@ private:
 
   // WebConfigNetworkObserver
   void onNetworkConnected() {
-    // TODO: start WebConfigServer here
-    Serial.println("WebConfigServer receives Network connected!");
+    log_w("\n\n\nWebConfigServer receives Network connected!");
+
+    config_status = SERVER_INITIALIZING;
+
+    #ifndef DISABLE_WEBCONFIG_MQTT
+    if (mqtt.isConnected() ) mqtt.disconnect();
+    #endif
+
+    // Configure and start the server:
+    WebConfigServer::configureServer();
+
+    // TODO: move this to reconnect future method:
+    WebConfigServer::enableServices();
+
+    #ifndef DISABLE_WEBCONFIG_MQTT
+    if (mqtt.isEnabled()) {
+      mqtt.setup();
+      if (mqtt.getReconnect()) mqtt.reconnect();
+    }
+    #endif
+
+    log_w("WebConfigServer onNetworkConnected done\n\n\n");
+
+    config_status = SERVER_RUNNING;
+
   }
 
 

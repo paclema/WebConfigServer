@@ -87,6 +87,7 @@ bool WebConfigServer::initWebConfigs(void){
 
 bool WebConfigServer::begin(void){
 
+  // Init LittleFS and load WebConfig file:
   if (config_status != CONFIG_LOADED) initWebConfigs();
 
   // Configure NTP if enabled before wifi restart:
@@ -103,25 +104,7 @@ bool WebConfigServer::begin(void){
 
 
   // Restart the newtwork:
-  #ifndef DISABLE_WEBCONFIG_MQTT
-  if (mqtt.isConnected() ) mqtt.disconnect();
-  #endif
   network.restart();
-
-  // Configure and start the server:
-  WebConfigServer::configureServer();
-
-  // TODO: move this to reconnect future method:
-  WebConfigServer::enableServices();
-
-  // Setup MQTT:
-  #ifndef DISABLE_WEBCONFIG_MQTT
-  if (mqtt.isEnabled()) {
-    mqtt.setup();
-    if (mqtt.getReconnect()) mqtt.reconnect();
-  }
-  #endif
-
   return true;
 
 }
