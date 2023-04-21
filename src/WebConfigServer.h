@@ -102,26 +102,7 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
 
 
 // WiFi & Network
-#ifdef ESP32
-  #include <WiFi.h>
-  #include "esp_wifi.h"
-  #include <WiFiMulti.h>
-  #include <ESPmDNS.h>
-
-  #define PROTO_TCP 6
-  #define PROTO_UDP 17
-
-  #if !IP_NAPT
-    #warning "IP_NAPT is not available with this configuration."
-  #else
-    #include "lwip/lwip_napt.h"
-  #endif
-
-#elif defined(ESP8266)
-  #include <ESP8266WiFi.h>
-  #include <ESP8266WiFiMulti.h>
-  #include <ESP8266mDNS.h>
-#endif
+#include "WebConfigNetwork.h"
 
 
 #include <ArduinoJson.h>
@@ -134,22 +115,7 @@ public:
 
   WebConfigStatus config_status = CONFIG_NOT_LOADED;
 
-  struct Network {
-    String ap_name;
-    String ap_password;
-    int ap_channel;
-    bool ap_ssid_hidden;
-    int ap_max_connection;
-    String ssid_name;
-    String ssid_password;
-    int connection_retries;
-    String ip_address;
-    String subnet;
-    String dns_server;
-    String hostname;
-    bool enable_NAT;
-  } network;
-
+  WebConfigNetwork network;
 #ifndef DISABLE_WEBCONFIG_MQTT
   WebConfigMQTT mqtt;
 #endif
@@ -296,12 +262,6 @@ private:
     WiFiMulti wifiMulti;
   #elif defined(ESP8266)
     ESP8266WiFiMulti wifiMulti;
-  #endif
-
-  #if ESP32 && IP_NAPT
-    uint8_t AP_clients = 0;
-    uint8_t AP_clients_last = AP_clients;
-    unsigned long previousHandleAPMillis = 0;
   #endif
 
   unsigned long currentLoopMillis = 0;

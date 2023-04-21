@@ -13,7 +13,8 @@ WebConfigServer::WebConfigServer(void):
     server = new ESP8266WebServer(80);
   #endif
 
-  // Setup internal configs:´
+  // Setup internal configs:
+  WebConfigServer::addConfig(network, "network");
   #ifndef DISABLE_WEBCONFIG_MQTT
   WebConfigServer::addConfig(mqtt, "mqtt");
   #endif
@@ -101,7 +102,10 @@ bool WebConfigServer::begin(void){
 
 
   // Restart the newtwork:
-  WebConfigServer::networkRestart();
+  #ifndef DISABLE_WEBCONFIG_MQTT
+  if (mqtt.isConnected() ) mqtt.disconnect();
+  #endif
+  network.restart();
 
   // Configure and start the server:
   WebConfigServer::configureServer();
@@ -170,21 +174,6 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
   // Parse char network[64]:
   // strlcpy(network.ssid_name, doc["network"]["ssid_name"] | "SSID_name", sizeof(network.ssid_name));
 
-  // Network object:
-  network.ap_name = doc["network"]["AP_SSID"] | "iotdevice";
-  network.ap_password = doc["network"]["AP_password"] | "iotdevice";
-  network.ap_channel = doc["network"]["AP_channel"] | 6;
-  network.ap_ssid_hidden = doc["network"]["AP_SSID_hidden"] | false;
-  network.ap_max_connection = doc["network"]["AP_max_connection"] | 4;
-  network.ssid_name = doc["network"]["WiFi_SSID"] | "SSID_name";
-  network.ssid_password = doc["network"]["WiFi_password"] | "SSID_password";
-  network.connection_retries = doc["network"]["connection_retries"] | 0;
-  network.ip_address = doc["network"]["ip_address"] | "192.168.1.2";
-  network.subnet = doc["network"]["subnet"] | "255.255.255.0";
-  network.dns_server = doc["network"]["dns_server"] | "192.168.1.1";
-  network.hostname = doc["network"]["hostname"] | "iotdevice.local";
-  network.enable_NAT = doc["network"]["enable_NAT"] | false;
-
 
   // MQTT object:
   #ifndef DISABLE_WEBCONFIG_MQTT
@@ -244,7 +233,7 @@ void WebConfigServer::addConfig(IWebConfig& config, String nameObject){
 void WebConfigServer::addConfigService(IWebConfig& config, String nameObject){
   config.nameConfigObject = nameObject;
   configsServices.add(&config);
-  Serial.print("IWebConfig Object added for: ");
+  Serial.print("IWebConfig Object Service added for: ");
   Serial.println(config.nameConfigObject);
 };
 
@@ -408,8 +397,8 @@ void WebConfigServer::saveConfigurationFile(const char *filename){
   DynamicJsonDocument doc(CONFIG_JSON_SIZE);
 
   // Network object:
-  doc["network"]["ssid_name"] = network.ssid_name;
-  doc["network"]["ssid_password"] = network.ssid_password;
+  // doc["network"]["ssid_name"] = network.ssid_name;
+  // doc["network"]["ssid_password"] = network.ssid_password;
 
   // MQTT object:
   #ifndef DISABLE_WEBCONFIG_MQTT    
@@ -1354,13 +1343,9 @@ void WebConfigServer::loop(void){
     deviceSetupDone = true;
   }
   
-  // Handle stations connection to the AP:
-  #if ESP32 && IP_NAPT
-    if(currentLoopMillis - previousHandleAPMillis > (unsigned)3000) {
-      handleAPStations();
-      previousHandleAPMillis = currentLoopMillis;
-    }
-  #endif
+  // Handle network loop: for now only  to show stations connection to the AP.
+  // TODO: Remove it and use event to handle this.
+  network.loop();
 
   // Handle WebConfigServer not asyc web server:
   #ifndef USE_ASYNC_WEBSERVER
@@ -1409,177 +1394,7 @@ void WebConfigServer::loop(void){
 
 }
 
-
-void WebConfigServer::networkRestart(void){
-  if(config_status == CONFIG_LOADED){
-
-    // WiFi setup:
-    // WiFi.disconnect(true);        // close old connections
-    #ifndef DISABLE_WEBCONFIG_MQTT
-    if (mqtt.isConnected() ) mqtt.disconnect();
-    #endif
-    
-    #ifdef ESP32
-      WiFi.setHostname(network.hostname.c_str());
-      WiFi.mode(WIFI_MODE_APSTA);
-    #elif defined(ESP8266)
-      WiFi.hostname(network.hostname);
-      // WiFi.mode(WIFI_STA);
-      WiFi.mode(WIFI_AP_STA);
-    #endif
-
-
-
-    // Client Wifi config:
-    if (network.ssid_name!=NULL && network.ssid_password!=NULL){
-
-      // wifiMulti.addAP(network.ssid_name.c_str(),network.ssid_password.c_str());    // Using wifiMulti
-      WiFi.begin(network.ssid_name.c_str(),network.ssid_password.c_str());      // Connecting just to one ap
-
-      Serial.printf("Connecting to %s...\n",network.ssid_name.c_str());
-      int retries = 0;
-      // while ((wifiMulti.run() != WL_CONNECTED)) {   // Using wifiMulti
-      while (WiFi.status() != WL_CONNECTED) {    // Connecting just to one ap
-        if (network.connection_retries == 0) Serial.print('.');
-        else Serial.printf(" %d of %d \n", retries, network.connection_retries);
-        delay(500);
-        retries++;
-        if (network.connection_retries != 0 && (retries > network.connection_retries)) break;
-      }
-      if ((network.connection_retries != 0 && (retries <= network.connection_retries)) || network.connection_retries == 0) {
-        Serial.print("\n\nConnected to ");Serial.print(WiFi.SSID());
-        Serial.print("\nIP address:\t");Serial.println(WiFi.localIP());
-      } else {Serial.print("\n\nNot Connected to ");Serial.print(network.ssid_name);Serial.println(" max retries reached.");}
-
-    }
-
-
-    // Config access point:
-    bool APEnabled = false;
-    uint8_t channelSTA;
-    #ifdef ESP32
-      wifi_ap_record_t staConfig;
-      esp_wifi_sta_get_ap_info(&staConfig);
-      channelSTA = staConfig.primary;
-    #elif defined(ESP8266)
-      channelSTA = wifi_get_channel();
-    #endif
-
-
-    if (network.ap_name!=NULL && network.ap_password!=NULL){
-        Serial.print("Setting soft-AP... ");
-        
-        if (network.enable_NAT){
-          APEnabled = WiFi.softAP(network.ap_name.c_str(),
-            network.ap_password.c_str());
-        } else {
-          APEnabled = WiFi.softAP(network.ap_name.c_str(),
-            network.ap_password.c_str(),
-            // If STA connected, use the same channel instead configured one:
-            (WiFi.isConnected() && channelSTA) ? channelSTA : network.ap_channel,  
-            network.ap_ssid_hidden,
-            network.ap_max_connection);
-        }
-        Serial.println(APEnabled ? "Ready" : "Failed!");
-        IPAddress myIP = WiFi.softAPIP();
-        Serial.print(network.ap_name);Serial.print(" AP IP address: ");
-        Serial.println(myIP);
-
-    }
-
-    // Enable NAPT:
-    #if ESP32 && IP_NAPT
-      if (network.enable_NAT){
-        if (WiFi.isConnected() && APEnabled) {
-          esp_err_t err = WebConfigServer::enableNAT();
-          if (err == ESP_OK) Serial.println("NAT configured and enabled");
-          else Serial.printf("Error configuring NAT: %s\n", esp_err_to_name(err));
-        } else Serial.printf("Error configuring NAT: STA or AP not working\n");
-      }
-    #endif
-
-    // Configure device hostname:
-    if (network.hostname){
-      if (MDNS.begin(network.hostname.c_str())) Serial.println("mDNS responder started");
-      else Serial.println("Error setting up MDNS responder!");
-    }
-
-  }
-}
-
-
-#if ESP32 && IP_NAPT
-esp_err_t WebConfigServer::enableNAT(void){
-
-  // Give DNS servers to AP side:
-  esp_err_t err;
-  tcpip_adapter_dns_info_t ip_dns_main;
-  tcpip_adapter_dns_info_t ip_dns_backup;
-
-
-  err = tcpip_adapter_dhcps_stop(TCPIP_ADAPTER_IF_AP); if (err != ESP_OK) return err;
-
-  err = tcpip_adapter_get_dns_info(TCPIP_ADAPTER_IF_STA, ESP_NETIF_DNS_MAIN, &ip_dns_main); if (err != ESP_OK) return err;
-  err = tcpip_adapter_get_dns_info(TCPIP_ADAPTER_IF_STA, ESP_NETIF_DNS_BACKUP, &ip_dns_backup); if (err != ESP_OK) return err;
-
-  err = tcpip_adapter_set_dns_info(TCPIP_ADAPTER_IF_AP, ESP_NETIF_DNS_MAIN, &ip_dns_main); if (err != ESP_OK) return err;
-  // Serial.printf("\ntcpip_adapter_set_dns_info ESP_NETIF_DNS_MAIN: err %s . ip_dns:" IPSTR, esp_err_to_name(err), IP2STR(&ip_dns_main.ip.u_addr.ip4)) ;
-
-  dhcps_offer_t opt_val = OFFER_DNS; // supply a dns server via dhcps
-  tcpip_adapter_dhcps_option(ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &opt_val, 1);
-
-  err = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP); if (err != ESP_OK) return err;
-
-
-  // Enable NAT:
-  ip_napt_enable(WiFi.softAPIP(), 1);
-
-  // Example port mapping to stations:
-  // Mapping Webserver: (of an sta connected to this ap)
-  IPAddress ap_ip = WiFi.localIP();
-  ip_portmap_add(PROTO_TCP,ap_ip, 8080,IPAddress(192, 168, 4, 2), 80 );
-  ip_portmap_add(PROTO_UDP,ap_ip, 8080,IPAddress(192, 168, 4, 2), 80 );
-  // Mapping WebSockets:
-  ip_portmap_add(PROTO_TCP,ap_ip, 94,IPAddress(192, 168, 4, 2), 94 );
-  ip_portmap_add(PROTO_UDP,ap_ip, 94,IPAddress(192, 168, 4, 2), 94 );
-
-  return err;
-}
-
-void WebConfigServer::handleAPStations(void){
-  AP_clients = WiFi.softAPgetStationNum();
-
-  if (AP_clients_last != AP_clients){
-    Serial.printf("Stations connected to AP: %d\n", AP_clients);
-    AP_clients_last = AP_clients;
-
-    wifi_sta_list_t wifi_sta_list;
-    tcpip_adapter_sta_list_t adapter_sta_list;
-  
-    memset(&wifi_sta_list, 0, sizeof(wifi_sta_list));
-    memset(&adapter_sta_list, 0, sizeof(adapter_sta_list));
-
-    // delay(500);   // To give time to AP to provide IP to the new station
-    esp_wifi_ap_get_sta_list(&wifi_sta_list);
-    tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list);
-  
-    for (int i = 0; i < adapter_sta_list.num; i++) {
-      tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
-      Serial.printf("\t - Station %d MAC: ", i);
-      for(int i = 0; i< 6; i++){
-        Serial.printf("%02X", station.mac[i]);  
-        if(i<5)Serial.print(":");
-      }
-      Serial.printf("  IP: " IPSTR, IP2STR(&station.ip));
-      Serial.println();
-    }
-  }
-}
-#endif
-
-
 void WebConfigServer::deepSleepHandler() {
-
 
   #ifdef ESP32
     #pragma message ( "WebConfig deepSleep not implemented yet for ESP32" )
