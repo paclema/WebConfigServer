@@ -13,25 +13,30 @@ void WebConfigNetwork::WiFiEventHandler(void* arg, esp_event_base_t event_base, 
   switch (event_id) {
     case WIFI_EVENT_STA_CONNECTED: {
       log_i("WIFI CONNECTED");
-      log_i("Connecting to %s...\n",ssid_name.c_str());
+      log_i("Connectied to %s...\n",ssid_name.c_str());
 
-      if (self->networkObserver) {
-          self->networkObserver->onNetworkConnected();
-        }
+      // if (self->networkObserver) {
+      //     self->networkObserver->onNetworkConnected();
+      //   }
       break;
       }
     case IP_EVENT_STA_GOT_IP:{
-      Serial.print("Obtained IP address: ");
       ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-      log_i("[ipaddr][%s]", IPAddress(event->ip_info.ip.addr).toString());
-      log_i("[ipaddr][%s]", WiFi.localIP().toString());
+      log_i("[ipaddr][%s]", IPAddress(event->ip_info.ip.addr).toString().c_str());
+      log_i("[ipaddr][%s]", WiFi.localIP().toString().c_str());
+      if (self->networkObserver) {
+          self->networkObserver->onNetworkConnected();
+      }
       break;
       }
     case WIFI_EVENT_STA_DISCONNECTED:{
       log_i("WIFI DISCONNECTED ");
       ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-      log_i("[ipaddr][%s]", IPAddress(event->ip_info.ip.addr).toString());
-      log_i("[ipaddr][%s]", WiFi.localIP().toString());
+      log_i("[ipaddr][%s]", IPAddress(event->ip_info.ip.addr).toString().c_str());
+      log_i("[ipaddr][%s]", WiFi.localIP().toString().c_str());
+      if (self->networkObserver) {
+          self->networkObserver->onNetworkDisconnected();
+      }
       break;
       }
     default:

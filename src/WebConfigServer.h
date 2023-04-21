@@ -32,6 +32,9 @@
 typedef int8_t WebConfigStatus;
 #define CONFIG_NOT_LOADED            ((WebConfigStatus)   0)
 #define CONFIG_LOADED                ((WebConfigStatus)   1)
+#define SERVER_INITIALIZING          ((WebConfigStatus)   2)
+#define SERVER_RUNNING               ((WebConfigStatus)   3)
+#define SERVER_DOWN                  ((WebConfigStatus)   -1)
 
 #define ARDUINOJSON_ENABLE_ALIGNMENT 1
 
@@ -344,7 +347,12 @@ private:
     config_status = SERVER_RUNNING;
 
   }
+  void onNetworkDisconnected() {
+    log_e("\n\n\nWebConfigServer receives Network diconnected!");
+    // TODO: stop old WebConfigServer client connections here
+    config_status = SERVER_RUNNING;
 
+  }
 
 };
 #endif
