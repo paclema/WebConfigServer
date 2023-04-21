@@ -8,6 +8,7 @@
 #ifdef ESP32
   #include <WiFi.h>
   #include "esp_wifi.h"
+  #include <esp_event.h>
   #include <WiFiMulti.h>
   #include <ESPmDNS.h>
 
@@ -47,15 +48,19 @@ private:
   String hostname;
   bool enable_NAT;
 
-#if ESP32 && IP_NAPT
+#ifdef ESP32
+  #ifdef IP_NAPT
   uint8_t AP_clients = 0;
   uint8_t AP_clients_last = AP_clients;
   unsigned long currentLoopMillis = 0;
   unsigned long previousHandleAPMillis = 0;
 
-
   esp_err_t enableNAT(void);
   void handleAPStations(void);
+  #endif
+  
+  static void WiFiEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+
 #endif
 
 

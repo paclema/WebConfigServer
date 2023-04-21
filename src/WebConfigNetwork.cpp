@@ -5,6 +5,42 @@ WebConfigNetwork::WebConfigNetwork(WebConfigNetworkObserver* observer):
 
 }
 
+#ifdef ESP32
+void WebConfigNetwork::WiFiEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
+  WebConfigNetwork* self = (WebConfigNetwork*) arg;
+  log_i("[WebConfigNetwork-event] event_id: %d", event_id);
+
+  switch (event_id) {
+    case WIFI_EVENT_STA_CONNECTED: {
+      log_i("WIFI CONNECTED");
+      log_i("Connecting to %s...\n",ssid_name.c_str());
+
+      if (self->networkObserver) {
+          self->networkObserver->onNetworkConnected();
+        }
+      break;
+      }
+    case IP_EVENT_STA_GOT_IP:{
+      Serial.print("Obtained IP address: ");
+      ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+      log_i("[ipaddr][%s]", IPAddress(event->ip_info.ip.addr).toString());
+      log_i("[ipaddr][%s]", WiFi.localIP().toString());
+      break;
+      }
+    case WIFI_EVENT_STA_DISCONNECTED:{
+      log_i("WIFI DISCONNECTED ");
+      ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+      log_i("[ipaddr][%s]", IPAddress(event->ip_info.ip.addr).toString());
+      log_i("[ipaddr][%s]", WiFi.localIP().toString());
+      break;
+      }
+    default:
+      break;
+  }
+}
+#endif
+
+
 void WebConfigNetwork::restart(void){
 
   // WiFi setup:
@@ -27,10 +63,16 @@ void WebConfigNetwork::restart(void){
   // Client Wifi config:
   if (ssid_name!=NULL && ssid_password!=NULL){
 
+    Serial.printf("Connecting to %s...\n",ssid_name.c_str());
+
     // wifiMulti.addAP(ssid_name.c_str(),ssid_password.c_str());    // Using wifiMulti
     WiFi.begin(ssid_name.c_str(),ssid_password.c_str());      // Connecting just to one ap
 
-    Serial.printf("Connecting to %s...\n",ssid_name.c_str());
+
+    #ifdef ESP32
+    esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &WebConfigNetwork::WiFiEventHandler, this);
+    esp_event_handler_register(IP_EVENT, ESP_EVENT_ANY_ID, &WebConfigNetwork::WiFiEventHandler, this);
+    #elif defined(ESP8266)
     int retries = 0;
     // while ((wifiMulti.run() != WL_CONNECTED)) {   // Using wifiMulti
     while (WiFi.status() != WL_CONNECTED) {    // Connecting just to one ap
@@ -48,6 +90,7 @@ void WebConfigNetwork::restart(void){
       networkObserver->onNetworkConnected();
 
     } else {Serial.print("\n\nNot Connected to ");Serial.print(ssid_name);Serial.println(" max retries reached.");}
+    #endif
 
   }
 
