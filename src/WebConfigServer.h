@@ -349,7 +349,7 @@ private:
   void onNetworkDisconnected() {
     log_e("\n\n\nWebConfigServer receives Network diconnected!");
     // TODO: stop old WebConfigServer client connections here
-    config_status = SERVER_RUNNING;
+    config_status = SERVER_DOWN;
 
   }
 
