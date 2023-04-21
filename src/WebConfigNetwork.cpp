@@ -13,7 +13,7 @@ void WebConfigNetwork::WiFiEventHandler(void* arg, esp_event_base_t event_base, 
   switch (event_id) {
     case WIFI_EVENT_STA_CONNECTED: {
       log_i("WIFI CONNECTED");
-      log_i("Connectied to %s...\n",ssid_name.c_str());
+      log_i("Connected to %s \n", self->ssid_name.c_str());
 
       // if (self->networkObserver) {
       //     self->networkObserver->onNetworkConnected();
