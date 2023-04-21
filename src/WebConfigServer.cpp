@@ -1318,36 +1318,36 @@ String WebConfigServer::getContentType(String filename) {
 
 void WebConfigServer::loop(void){
 
-  // Update internal variables:
   currentLoopMillis = millis();
-  // WebConfigServer::updateSizeLittleFS(false);
 
-  if (!deviceSetupDone) {
-    deviceSetupTime = currentLoopMillis;
-    deviceSetupDone = true;
+  // Handle stuff that requires the WebServer running
+  if (config_status == SERVER_RUNNING) {
+    // Update internal variables:
+    // WebConfigServer::updateSizeLittleFS(false);
+    
+    // Handle network loop: for now only  to show stations connection to the AP.
+    // TODO: Remove it and use event to handle this.
+    network.loop();
+
+    // Handle WebConfigServer not asyc web server:
+    #ifndef USE_ASYNC_WEBSERVER
+      server->handleClient();
+    #endif
+
+    // Handle mqtt reconnection:
+    #ifndef DISABLE_WEBCONFIG_MQTT
+    if (mqtt.isEnabled()) {
+      if (mqtt.getReconnect() && !mqtt.isConnected() && WiFi.status() == WL_CONNECTED) mqtt.reconnect();
+      mqtt.loop();
+    }
+    #endif
+
+    // Services loop:
+    if (services.ota.isEnabled()) services.ota.handle();
+    if (services.ftp.enabled) ftpSrv.handleFTP();
+    if (services.webSockets.isEnabled()) services.webSockets.handle();
   }
-  
-  // Handle network loop: for now only  to show stations connection to the AP.
-  // TODO: Remove it and use event to handle this.
-  network.loop();
 
-  // Handle WebConfigServer not asyc web server:
-  #ifndef USE_ASYNC_WEBSERVER
-    server->handleClient();
-  #endif
-
-  // Handle mqtt reconnection:
-  #ifndef DISABLE_WEBCONFIG_MQTT
-  if (mqtt.isEnabled()) {
-    if (mqtt.getReconnect() && !mqtt.isConnected() && WiFi.status() == WL_CONNECTED) mqtt.reconnect();
-    mqtt.loop();
-  }
-  #endif
-
-  // Services loop:
-  if (services.ota.isEnabled()) services.ota.handle();
-  if (services.ftp.enabled) ftpSrv.handleFTP();
-  if (services.webSockets.isEnabled()) services.webSockets.handle();
   if (services.deep_sleep.enabled) deepSleepHandler();
 
 

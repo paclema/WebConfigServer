@@ -272,7 +272,6 @@ private:
   unsigned long currentLoopMillis = 0;
 
   // Device Sleep
-  bool deviceSetupDone = false;
   unsigned long deviceSetupTime = 0;
   void (*preSleep_routine)();
   bool preSleep_routine_configured = false;
