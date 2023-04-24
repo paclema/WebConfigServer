@@ -48,6 +48,14 @@ private:
   String hostname;
   bool enable_NAT;
 
+// WiFiMulti
+#ifdef ESP32
+    WiFiMulti wifiMulti;
+#elif defined(ESP8266)
+    ESP8266WiFiMulti wifiMulti;
+#endif
+
+
 #ifdef ESP32
   #ifdef IP_NAPT
   uint8_t AP_clients = 0;

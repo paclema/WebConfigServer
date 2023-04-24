@@ -102,7 +102,6 @@ bool WebConfigServer::begin(void){
     configTime(services.ntp.gmtOffset_sec, services.ntp.daylightOffset_sec, services.ntp.ntpServer.c_str());
   }
 
-
   // Restart the newtwork:
   network.restart();
   return true;

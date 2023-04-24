@@ -48,12 +48,7 @@ void WebConfigNetwork::WiFiEventHandler(void* arg, esp_event_base_t event_base, 
 
 void WebConfigNetwork::restart(void){
 
-  // WiFi setup:
-  // WiFi.disconnect(true);        // close old connections
-  // #ifndef DISABLE_WEBCONFIG_MQTT
-  // if (mqtt.isConnected() ) mqtt.disconnect();
-  // #endif
-  
+  // WiFi Station:
   #ifdef ESP32
     WiFi.setHostname(hostname.c_str());
     WiFi.mode(WIFI_MODE_APSTA);
@@ -64,16 +59,11 @@ void WebConfigNetwork::restart(void){
   #endif
 
 
-
   // Client Wifi config:
   if (ssid_name!=NULL && ssid_password!=NULL){
-
     Serial.printf("Connecting to %s...\n",ssid_name.c_str());
 
-    // wifiMulti.addAP(ssid_name.c_str(),ssid_password.c_str());    // Using wifiMulti
-    WiFi.begin(ssid_name.c_str(),ssid_password.c_str());      // Connecting just to one ap
-
-
+    // Configure WiFi Event Handlers
     #ifdef ESP32
     esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &WebConfigNetwork::WiFiEventHandler, this);
     esp_event_handler_register(IP_EVENT, ESP_EVENT_ANY_ID, &WebConfigNetwork::WiFiEventHandler, this);
@@ -82,7 +72,6 @@ void WebConfigNetwork::restart(void){
     this->staConnectedHandler = WiFi.onStationModeConnected(std::bind(&WebConfigNetwork::onStationModeConnectedHandler, this, std::placeholders::_1));
     this->staGotIPHandler = WiFi.onStationModeGotIP(std::bind(&WebConfigNetwork::onStationModeGotIPHandler, this, std::placeholders::_1));
     this->staDisconnectedHandler = WiFi.onStationModeDisconnected(std::bind(&WebConfigNetwork::onStationModeDisconnectedHandler, this, std::placeholders::_1));
-
 
     // int retries = 0;
     // // while ((wifiMulti.run() != WL_CONNECTED)) {   // Using wifiMulti
@@ -97,15 +86,19 @@ void WebConfigNetwork::restart(void){
     //   Serial.print("\n\nConnected to ");Serial.print(WiFi.SSID());
     //   Serial.print("\nIP address:\t");Serial.println(WiFi.localIP());
       
-
     // } else {Serial.print("\n\nNot Connected to ");Serial.print(ssid_name);Serial.println(" max retries reached.");}
-
     #endif
 
+    // Connect to only one AP: 
+    WiFi.begin(ssid_name.c_str(),ssid_password.c_str());
+
+    // Connect using wifiMulti:
+    // wifiMulti.addAP(ssid_name.c_str(),ssid_password.c_str());
+    // wifiMulti.run();
   }
 
 
-  // Config access point:
+  // Wifi Access Point::
   bool APEnabled = false;
   uint8_t channelSTA;
   #ifdef ESP32

@@ -265,14 +265,6 @@ private:
     ESP8266WebServer * server;
   #endif
 
-
-  // WiFi
-  #ifdef ESP32
-    WiFiMulti wifiMulti;
-  #elif defined(ESP8266)
-    ESP8266WiFiMulti wifiMulti;
-  #endif
-
   unsigned long currentLoopMillis = 0;
 
   // Device Sleep
@@ -335,7 +327,7 @@ private:
     // Configure and start the server:
     WebConfigServer::configureServer();
 
-    // TODO: move this to reconnect future method:
+    // Reenable services:
     WebConfigServer::enableServices();
 
     #ifndef DISABLE_WEBCONFIG_MQTT
@@ -346,6 +338,7 @@ private:
     #endif
 
     log_w("WebConfigServer onNetworkConnected done");
+    log_d("Heap size: %u\n", ESP.getFreeHeap());
 
     config_status = SERVER_RUNNING;
 
