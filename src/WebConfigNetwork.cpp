@@ -77,24 +77,29 @@ void WebConfigNetwork::restart(void){
     #ifdef ESP32
     esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &WebConfigNetwork::WiFiEventHandler, this);
     esp_event_handler_register(IP_EVENT, ESP_EVENT_ANY_ID, &WebConfigNetwork::WiFiEventHandler, this);
-    #elif defined(ESP8266)
-    int retries = 0;
-    // while ((wifiMulti.run() != WL_CONNECTED)) {   // Using wifiMulti
-    while (WiFi.status() != WL_CONNECTED) {    // Connecting just to one ap
-      if (connection_retries == 0) Serial.print('.');
-      else Serial.printf(" %d of %d \n", retries, connection_retries);
-      delay(500);
-      retries++;
-      if (connection_retries != 0 && (retries > connection_retries)) break;
-    }
-    if ((connection_retries != 0 && (retries <= connection_retries)) || connection_retries == 0) {
-      Serial.print("\n\nConnected to ");Serial.print(WiFi.SSID());
-      Serial.print("\nIP address:\t");Serial.println(WiFi.localIP());
-      
-      // TODO: change this call to be called into wifi event handler
-      networkObserver->onNetworkConnected();
 
-    } else {Serial.print("\n\nNot Connected to ");Serial.print(ssid_name);Serial.println(" max retries reached.");}
+    #elif defined(ESP8266)
+    this->staConnectedHandler = WiFi.onStationModeConnected(std::bind(&WebConfigNetwork::onStationModeConnectedHandler, this, std::placeholders::_1));
+    this->staGotIPHandler = WiFi.onStationModeGotIP(std::bind(&WebConfigNetwork::onStationModeGotIPHandler, this, std::placeholders::_1));
+    this->staDisconnectedHandler = WiFi.onStationModeDisconnected(std::bind(&WebConfigNetwork::onStationModeDisconnectedHandler, this, std::placeholders::_1));
+
+
+    // int retries = 0;
+    // // while ((wifiMulti.run() != WL_CONNECTED)) {   // Using wifiMulti
+    // while (WiFi.status() != WL_CONNECTED) {    // Connecting just to one ap
+    //   if (connection_retries == 0) Serial.print('.');
+    //   else Serial.printf(" %d of %d \n", retries, connection_retries);
+    //   delay(500);
+    //   retries++;
+    //   if (connection_retries != 0 && (retries > connection_retries)) break;
+    // }
+    // if ((connection_retries != 0 && (retries <= connection_retries)) || connection_retries == 0) {
+    //   Serial.print("\n\nConnected to ");Serial.print(WiFi.SSID());
+    //   Serial.print("\nIP address:\t");Serial.println(WiFi.localIP());
+      
+
+    // } else {Serial.print("\n\nNot Connected to ");Serial.print(ssid_name);Serial.println(" max retries reached.");}
+
     #endif
 
   }
