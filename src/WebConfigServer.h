@@ -103,6 +103,10 @@ extern "C" int clock_gettime(clockid_t unused, struct timespec *tp);
   #error Only ESP32 or ESP8266 builds are supported
 #endif
 
+// Logs
+#ifdef ESP8266
+  #include <ESP8266Log.h>
+#endif
 
 // WiFi & Network
 #include "WebConfigNetwork.h"
@@ -320,7 +324,7 @@ private:
 
   // WebConfigNetworkObserver
   void onNetworkConnected() {
-    log_w("\n\n\nWebConfigServer receives Network connected!");
+    log_w("WebConfigServer receives Network connected!");
 
     config_status = SERVER_INITIALIZING;
 
@@ -341,13 +345,13 @@ private:
     }
     #endif
 
-    log_w("WebConfigServer onNetworkConnected done\n\n\n");
+    log_w("WebConfigServer onNetworkConnected done");
 
     config_status = SERVER_RUNNING;
 
   }
   void onNetworkDisconnected() {
-    log_e("\n\n\nWebConfigServer receives Network diconnected!");
+    log_e("WebConfigServer receives Network diconnected!");
     // TODO: stop old WebConfigServer client connections here
     config_status = SERVER_DOWN;
 
