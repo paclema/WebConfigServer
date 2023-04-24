@@ -73,29 +73,10 @@ private:
   WiFiEventHandler staConnectedHandler;
   WiFiEventHandler staDisconnectedHandler;
   WiFiEventHandler staGotIPHandler;
-
-  void onStationModeConnectedHandler(const WiFiEventStationModeConnected& event) {
-    char str_bssid[20];
-    sprintf(str_bssid, "%02x:%02x:%02x:%02x:%02x:%02x", event.bssid[0], event.bssid[1], event.bssid[2], event.bssid[3], event.bssid[4], event.bssid[5]);
-    Serial.printf("Conected to SSID: %s BSSID: %s\n", event.ssid.c_str(), str_bssid);
-  }
-
-  void onStationModeGotIPHandler(const WiFiEventStationModeGotIP& event) {
-    Serial.printf("Got IP: %s\n", event.ip.toString().c_str());
-    if (networkObserver) {
-      networkObserver->onNetworkConnected();
-    }
-  }
-
-  void onStationModeDisconnectedHandler(const WiFiEventStationModeDisconnected& event) {
-    char str_bssid[20];
-    sprintf(str_bssid, "%02x:%02x:%02x:%02x:%02x:%02x", event.bssid[0], event.bssid[1], event.bssid[2], event.bssid[3], event.bssid[4], event.bssid[5]);
-    Serial.printf("Disconnected from SSID: %s BSSID: %s\n", event.ssid.c_str(), str_bssid);
-    Serial.printf("Disconnected Reason: %d\n",event.reason);
-    if (this->networkObserver) {
-      this->networkObserver->onNetworkDisconnected();
-    }
-  }
+  
+  void onStationModeConnectedHandler(const WiFiEventStationModeConnected& event);
+  void onStationModeGotIPHandler(const WiFiEventStationModeGotIP& event);
+  void onStationModeDisconnectedHandler(const WiFiEventStationModeDisconnected& event);
 
 #endif
 
