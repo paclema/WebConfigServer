@@ -41,7 +41,6 @@ private:
   int ap_max_connection;
   String ssid_name;
   String ssid_password;
-  int connection_retries;
   String ip_address;
   String subnet;
   String dns_server;

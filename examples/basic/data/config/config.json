@@ -7,7 +7,6 @@
     "AP_max_connection": 4,
     "WiFi_SSID": "wifissid",
     "WiFi_password": "wifipass",
-    "connection_retries": 0,
     "ip_address": "192.168.1.2",
     "subnet": "255.255.255.0",
     "dns_Server": "192.168.1.1",

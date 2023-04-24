@@ -73,20 +73,6 @@ void WebConfigNetwork::restart(void){
     this->staGotIPHandler = WiFi.onStationModeGotIP(std::bind(&WebConfigNetwork::onStationModeGotIPHandler, this, std::placeholders::_1));
     this->staDisconnectedHandler = WiFi.onStationModeDisconnected(std::bind(&WebConfigNetwork::onStationModeDisconnectedHandler, this, std::placeholders::_1));
 
-    // int retries = 0;
-    // // while ((wifiMulti.run() != WL_CONNECTED)) {   // Using wifiMulti
-    // while (WiFi.status() != WL_CONNECTED) {    // Connecting just to one ap
-    //   if (connection_retries == 0) Serial.print('.');
-    //   else Serial.printf(" %d of %d \n", retries, connection_retries);
-    //   delay(500);
-    //   retries++;
-    //   if (connection_retries != 0 && (retries > connection_retries)) break;
-    // }
-    // if ((connection_retries != 0 && (retries <= connection_retries)) || connection_retries == 0) {
-    //   Serial.print("\n\nConnected to ");Serial.print(WiFi.SSID());
-    //   Serial.print("\nIP address:\t");Serial.println(WiFi.localIP());
-      
-    // } else {Serial.print("\n\nNot Connected to ");Serial.print(ssid_name);Serial.println(" max retries reached.");}
     #endif
 
     // Connect to only one AP: 
@@ -243,7 +229,6 @@ void WebConfigNetwork::parseWebConfig(JsonObjectConst configObject){
   this->ap_max_connection = configObject["AP_max_connection"] | 4;
   this->ssid_name = configObject["WiFi_SSID"] | "SSID_name";
   this->ssid_password = configObject["WiFi_password"] | "SSID_password";
-  this->connection_retries = configObject["connection_retries"] | 0;
   this->ip_address = configObject["ip_address"] | "192.168.1.2";
   this->subnet = configObject["subnet"] | "255.255.255.0";
   this->dns_server = configObject["dns_server"] | "192.168.1.1";
