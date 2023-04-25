@@ -1319,6 +1319,8 @@ void WebConfigServer::loop(void){
 
   currentLoopMillis = millis();
 
+  network.loop();
+  
   // Handle stuff that requires the WebServer running
   if (config_status == SERVER_RUNNING) {
     // Update internal variables:

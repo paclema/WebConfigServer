@@ -25,6 +25,8 @@
   #include <ESP8266WiFi.h>
   #include <ESP8266WiFiMulti.h>
   #include <ESP8266mDNS.h>
+
+  #include <ESP8266Log.h>
 #endif
 
 #include "WebConfigNetworkObserver.h"
@@ -55,28 +57,29 @@ private:
 #endif
 
 
+uint8_t AP_clients = 0;
+void handleAPStations(void);
+bool updateApStations = false;
+
 #ifdef ESP32
   #ifdef IP_NAPT
-  uint8_t AP_clients = 0;
-  uint8_t AP_clients_last = AP_clients;
-  unsigned long currentLoopMillis = 0;
-  unsigned long previousHandleAPMillis = 0;
-
   esp_err_t enableNAT(void);
-  void handleAPStations(void);
   #endif
   
   static void WiFiEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
-
 
 #elif defined(ESP8266)
   WiFiEventHandler staConnectedHandler;
   WiFiEventHandler staDisconnectedHandler;
   WiFiEventHandler staGotIPHandler;
+  WiFiEventHandler apConnectedStaHandler;
+  WiFiEventHandler apDisonnectedStaHandler;
   
   void onStationModeConnectedHandler(const WiFiEventStationModeConnected& event);
   void onStationModeGotIPHandler(const WiFiEventStationModeGotIP& event);
   void onStationModeDisconnectedHandler(const WiFiEventStationModeDisconnected& event);
+  void onSoftAPModeStationConnectedHandler(const WiFiEventSoftAPModeStationConnected& event);
+  void onSoftAPModeStationDisconnectedHandler(const WiFiEventSoftAPModeStationDisconnected& event);
 
 #endif
 
@@ -84,6 +87,7 @@ private:
 public:
   WebConfigNetwork(WebConfigNetworkObserver* observer);
 
+  void loop(void);
   void restart(void);
 
   void parseWebConfig(JsonObjectConst configObject);
