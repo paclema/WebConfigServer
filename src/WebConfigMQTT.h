@@ -12,6 +12,12 @@
 
 #define MQTT_TOPIC_MAX_SIZE_LIST 10
 
+#ifdef ESP32
+  #include <WiFi.h>
+#elif defined(ESP8266)
+  #include <ESP8266WiFi.h>
+#endif
+
 
 class WebConfigMQTT: public IWebConfig{
 
@@ -31,8 +37,8 @@ private:
 #endif
 
   WiFiClient wifiClient;
-  WebSocketClient  * wsClient;
-  WebSocketStreamClient * wsStreamClient;
+  WebSocketClient  * wsClient = nullptr;
+  WebSocketStreamClient * wsStreamClient = nullptr;
   PubSubClient mqttClient;
 
   unsigned long previousMqttReconnectionMillis = millis();
@@ -68,8 +74,8 @@ private:
 public:
 
   void setup(void);
+  void disconnect(void);
   void reconnect(void);
-  void disconnect(void){ mqttClient.disconnect(); }
   void loop(void);
 
   bool isEnabled(void) { return enabled; }

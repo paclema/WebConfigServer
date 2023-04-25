@@ -1333,10 +1333,7 @@ void WebConfigServer::loop(void){
 
     // Handle mqtt reconnection:
     #ifndef DISABLE_WEBCONFIG_MQTT
-    if (mqtt.isEnabled()) {
-      if (mqtt.getReconnect() && !mqtt.isConnected() && WiFi.status() == WL_CONNECTED) mqtt.reconnect();
       mqtt.loop();
-    }
     #endif
 
     // Services loop:

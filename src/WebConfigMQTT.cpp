@@ -123,18 +123,44 @@ void WebConfigMQTT::setup(void){
 
 };
 
+void WebConfigMQTT::disconnect() {
+  // Close old possible conections
+  if (mqttClient.connected() ) mqttClient.disconnect();
+
+  // Delete client pointers
+  if (wsStreamClient){
+    wsStreamClient->flush();
+    wsStreamClient->stop();
+    delete wsStreamClient;
+    wsStreamClient = nullptr;
+  }
+  if (wsClient){
+    wsClient->stop();
+    delete wsClient;
+    wsClient = nullptr;
+  }
+
+  //Renew the connection
+  WebConfigMQTT::setup();
+
+};
 
 void WebConfigMQTT::reconnect() {
   // Loop until we're reconnected
   if (currentLoopMillis - previousMqttReconnectionMillis > mqttReconnectionTime){
-    mqttClient.disconnect();
+
+    
     if (!mqttClient.connected() && ( mqttMaxRetries <= 0 || (mqttRetries <= mqttMaxRetries)) ) {
+      WebConfigMQTT::disconnect();
+      
       bool mqttConnected = false;
       Serial.print("Attempting MQTT connection... ");
+      
       String mqttWillTopic = base_topic_pub + "connected";
       uint8_t mqttWillQoS = 2;
       boolean mqttWillRetain = true;
       String mqttWillMessage = "false";
+
       if (enable_user_and_pass)
         mqttConnected = mqttClient.connect(id_name.c_str(),
                                             user_name.c_str(),
@@ -186,19 +212,16 @@ void WebConfigMQTT::reconnect() {
 void WebConfigMQTT::loop(void){
   currentLoopMillis = millis();
   
-  mqttClient.loop();
+  if ( this->enabled) {
+    if ( !this->mqttClient.connected() &&
+          reconnect_mqtt && 
+          WiFi.status() == WL_CONNECTED ) {
+            connectionTime = currentLoopMillis;
+            WebConfigMQTT::reconnect();
+      }
 
-  /*
-  if(mqttClient.connected() && (publish_time_ms != 0) &&
-      (currentLoopMillis - previousMQTTPublishMillis > (unsigned)publish_time_ms)) {
-    previousMQTTPublishMillis = currentLoopMillis;
-    // Here starts the MQTT publish loop configured:
-
-    String topic_pub = base_topic_pub + "status";
-    String msg_pub ="{\"connected\":true}";
-    mqttClient.publish(topic_pub.c_str(), msg_pub.c_str());
+    if (mqttClient.connected()) mqttClient.loop();
   }
-  */
 
 };
 
