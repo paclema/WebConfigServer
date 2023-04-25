@@ -158,12 +158,6 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
   // strlcpy(network.ssid_name, doc["network"]["ssid_name"] | "SSID_name", sizeof(network.ssid_name));
 
 
-  // MQTT object:
-  #ifndef DISABLE_WEBCONFIG_MQTT
-  mqtt.setPublishTime(doc["device"]["publish_time_ms"]);
-  #endif
-
-
   // Services object:
   // FTP
   services.ftp.enabled = doc["services"]["FTP"]["enabled"] | false;

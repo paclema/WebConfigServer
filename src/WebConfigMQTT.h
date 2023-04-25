@@ -69,8 +69,6 @@ private:
   String pub_topic[MQTT_TOPIC_MAX_SIZE_LIST];
   String sub_topic[MQTT_TOPIC_MAX_SIZE_LIST];
 
-  int publish_time_ms = 2000;
-
 public:
 
   void setup(void);
@@ -82,10 +80,8 @@ public:
   bool isConnected(void) { return mqttClient.connected(); }
   bool useWebsockets(void) { return enable_websockets; }
   bool getReconnect(void) { return reconnect_mqtt; }
-  int getPublishTime(void) { return publish_time_ms; }
   String getBaseTopic(void) { return base_topic_pub; }
 
-  void setPublishTime(int ms) { publish_time_ms = ms; }
   PubSubClient *getMQTTClient(void) { return &mqttClient; }
   void setMQTTClientId(String client_id) { 
     id_name = client_id;
