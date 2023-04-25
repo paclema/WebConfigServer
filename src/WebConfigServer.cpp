@@ -1323,10 +1323,6 @@ void WebConfigServer::loop(void){
   if (config_status == SERVER_RUNNING) {
     // Update internal variables:
     // WebConfigServer::updateSizeLittleFS(false);
-    
-    // Handle network loop: for now only  to show stations connection to the AP.
-    // TODO: Remove it and use event to handle this.
-    network.loop();
 
     // Handle WebConfigServer not asyc web server:
     #ifndef USE_ASYNC_WEBSERVER

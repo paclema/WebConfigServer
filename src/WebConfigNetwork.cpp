@@ -40,6 +40,12 @@ void WebConfigNetwork::WiFiEventHandler(void* arg, esp_event_base_t event_base, 
       }
       break;
       }
+    case WIFI_EVENT_AP_STADISCONNECTED:
+    case WIFI_EVENT_AP_STACONNECTED: {
+      log_i("AP client updates");
+      self->handleAPStations();
+      break;
+      }
     default:
       break;
   }
@@ -228,20 +234,6 @@ void WebConfigNetwork::handleAPStations(void){
   }
 }
 #endif
-
-
-void WebConfigNetwork::loop(void){
-
-  // Handle stations connection to the AP:
-  #if ESP32 && IP_NAPT
-  currentLoopMillis = millis();
-    if(currentLoopMillis - previousHandleAPMillis > (unsigned)3000) {
-      handleAPStations();
-      previousHandleAPMillis = currentLoopMillis;
-    }
-  #endif
-
-};
 
 
 void WebConfigNetwork::parseWebConfig(JsonObjectConst configObject){

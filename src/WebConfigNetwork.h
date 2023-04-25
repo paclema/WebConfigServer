@@ -85,7 +85,6 @@ public:
   WebConfigNetwork(WebConfigNetworkObserver* observer);
 
   void restart(void);
-  void loop(void);
 
   void parseWebConfig(JsonObjectConst configObject);
 
