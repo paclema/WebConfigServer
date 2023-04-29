@@ -1,6 +1,6 @@
 # WebConfigServer
 [![Release Build](https://github.com/paclema/WebConfigServer/actions/workflows/release.yml/badge.svg)](https://github.com/paclema/WebConfigServer/actions/workflows/release.yml)
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/paclema/library/WebConfigServer.svg?)](https://registry.platformio.org/libraries/paclema/WebConfigServer)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/paclema/library/WebConfigServer.svg?version=1.5.1)](https://registry.platformio.org/libraries/paclema/WebConfigServer)
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 ## Features:
 
