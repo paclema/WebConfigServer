@@ -13,3 +13,4 @@ HEAD
 * Fix basic example to use littlefs instead spiffs
 * Create basic_class_with_mqtt example to show a class using WebConfig configuration and MQTTClient observer callbacks and client
 * Include basic_class_with_mqtt example into PatformIO examples
+* Include mqtt client setup for ESP32 target a WebConfigServer::begin method and enable mqtt loop only for ESP8266

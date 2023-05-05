@@ -72,7 +72,7 @@
     {
       "name": "MQTTClient",
       "owner": "paclema",
-      "version": "https://github.com/paclema/MQTTClient.git#master",
+      "version": "^0.0.0",
       "platforms": "*"
     }
   ],
@@ -91,7 +91,7 @@
       "name": "Basic Class with MQTTClient",
       "base": "examples/basic_class_with_mqtt",
       "files": ["platformio.ini", "src/basic_class_with_mqtt.ino"]
-  }
+    }
   ],
   "export": {
     "exclude": [

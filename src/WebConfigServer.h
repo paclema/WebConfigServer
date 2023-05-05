@@ -51,7 +51,6 @@ typedef int8_t WebConfigStatus;
 
 // MQTT
 #ifndef DISABLE_WEBCONFIG_MQTT
-#include <PubSubClient.h>
 #include <MQTTClient.h>
 
 #endif

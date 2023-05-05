@@ -104,6 +104,11 @@ bool WebConfigServer::begin(void){
 
   // Restart the newtwork:
   network.restart();
+
+  #ifndef DISABLE_WEBCONFIG_MQTT && defined(ESP§")
+    mqtt.setup();
+  #endif
+  
   return true;
 
 }
@@ -1326,7 +1331,7 @@ void WebConfigServer::loop(void){
     #endif
 
     // Handle mqtt reconnection:
-    #ifndef DISABLE_WEBCONFIG_MQTT
+    #ifndef DISABLE_WEBCONFIG_MQTT && defined(ESP8266)
       mqtt.loop();
     #endif
 
