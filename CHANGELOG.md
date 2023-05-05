@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Fix ESP§" typo
+
 v2.0.0 (2023-05-05)
 ------
 

@@ -105,7 +105,7 @@ bool WebConfigServer::begin(void){
   // Restart the newtwork:
   network.restart();
 
-  #ifndef DISABLE_WEBCONFIG_MQTT && defined(ESP§")
+  #ifndef DISABLE_WEBCONFIG_MQTT && defined(ESP32)
     mqtt.setup();
   #endif
   
