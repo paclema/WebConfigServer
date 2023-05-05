@@ -1331,7 +1331,7 @@ void WebConfigServer::loop(void){
     #endif
 
     // Handle mqtt reconnection:
-    #ifndef DISABLE_WEBCONFIG_MQTT && defined(ESP8266)
+    #if !defined(DISABLE_WEBCONFIG_MQTT) && defined(ESP8266)
       mqtt.loop();
     #endif
 

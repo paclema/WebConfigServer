@@ -203,7 +203,7 @@ void WebConfigNetwork::restart(void){
 
 };
 
-#if ESP32 && IP_NAPT
+#if defined(ESP32) && defined(IP_NAPT)
 esp_err_t WebConfigNetwork::enableNAT(void){
 
   // Give DNS servers to AP side:
