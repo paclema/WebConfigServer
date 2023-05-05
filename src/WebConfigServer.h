@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#include <string.h>
+
 // To enable asyc webserver use platformio build_flags = -D USE_ASYNC_WEBSERVER
 // Or define here and in main.cpp:
 // #define USE_ASYNC_WEBSERVER
@@ -50,7 +52,8 @@ typedef int8_t WebConfigStatus;
 // MQTT
 #ifndef DISABLE_WEBCONFIG_MQTT
 #include <PubSubClient.h>
-#include "WebConfigMQTT.h"
+#include <MQTTClient.h>
+
 #endif
 
 // WebConfigOTA
@@ -126,7 +129,7 @@ public:
 
   WebConfigNetwork network;
 #ifndef DISABLE_WEBCONFIG_MQTT
-  WebConfigMQTT mqtt;
+  MQTTClient mqtt;
 #endif
 
   struct FTP {
@@ -209,9 +212,9 @@ public:
   void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
 
 #ifndef DISABLE_WEBCONFIG_MQTT
-  PubSubClient *getMQTTClient(void) { return mqtt.getMQTTClient(); }
-  void setMQTTClientId(String client_id) { mqtt.setMQTTClientId(client_id); }
-  String getDeviceTopic(void) { return mqtt.getBaseTopic(); }
+  MQTTClient* getMQTTClient(void) { return &mqtt; }
+  void setMQTTClientId(String client_id) { mqtt.setMQTTClientId(std::string(client_id.c_str())); }
+  String getDeviceTopic(void) { return String(mqtt.getBaseTopic().c_str()); }
 #endif
 
   unsigned long getDeviceSetupTime(void) {return deviceSetupTime; }

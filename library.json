@@ -70,19 +70,10 @@
       "platforms": "*"
     },
     {
-      "name": "PubSubClient",
-      "owner": "knolleary",
-      "version": "^2.8"
-    },
-    {
-      "name": "WebSocketStreamClient",
+      "name": "MQTTClient",
       "owner": "paclema",
-      "version": "https://github.com/paclema/WebSocketStreamClient#development"
-    },
-    {
-      "name": "ArduinoHttpClient",
-      "owner": "paclema",
-      "version": "https://github.com/paclema/ArduinoHttpClient#development"
+      "version": "https://github.com/paclema/MQTTClient.git#master",
+      "platforms": "*"
     }
   ],
   "platforms": [
