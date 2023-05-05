@@ -18,3 +18,4 @@ HEAD
 * Add executable permissions to github Release action scripts
 * Fix compare_versions.sh script to compare an initial empty library version
 * Rename platformio example to Basic_Class_with_MQTTClient
+* Bump MQTTClient to v0.0.2
