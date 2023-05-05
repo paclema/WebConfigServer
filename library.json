@@ -86,7 +86,12 @@
         "name": "Basic",
         "base": "examples/basic",
         "files": ["platformio.ini", "src/basic.ino"]
-    }
+    },
+    {
+      "name": "Basic Class with MQTTClient",
+      "base": "examples/basic_class_with_mqtt",
+      "files": ["platformio.ini", "src/basic_class_with_mqtt.ino"]
+  }
   ],
   "export": {
     "exclude": [

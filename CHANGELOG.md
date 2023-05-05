@@ -12,3 +12,4 @@ HEAD
 * Update basic example replacing PubSubClient with MQTTClient client and auto reconnect
 * Fix basic example to use littlefs instead spiffs
 * Create basic_class_with_mqtt example to show a class using WebConfig configuration and MQTTClient observer callbacks and client
+* Include basic_class_with_mqtt example into PatformIO examples
