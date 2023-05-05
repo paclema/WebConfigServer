@@ -88,7 +88,7 @@
         "files": ["platformio.ini", "src/basic.ino"]
     },
     {
-      "name": "Basic Class with MQTTClient",
+      "name": "Basic_Class_with_MQTTClient",
       "base": "examples/basic_class_with_mqtt",
       "files": ["platformio.ini", "src/basic_class_with_mqtt.ino"]
     }
