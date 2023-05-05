@@ -10,3 +10,5 @@ HEAD
 * Add PayPal donate badge
 * Replace WebConfigMQTT with MQTTClient and remove PubSubClient dependencies
 * Update basic example replacing PubSubClient with MQTTClient client and auto reconnect
+* Fix basic example to use littlefs instead spiffs
+* Fix basic example to use littlefs instead spiffs
