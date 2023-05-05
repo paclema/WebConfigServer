@@ -16,3 +16,4 @@ HEAD
 * Include mqtt client setup for ESP32 target a WebConfigServer::begin method and enable mqtt loop only for ESP8266
 * Fix nested preprocessing directives
 * Add executable permissions to github Release action scripts
+* Fix compare_versions.sh script to compare an initial empty library version
