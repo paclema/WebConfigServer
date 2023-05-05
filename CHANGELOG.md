@@ -15,3 +15,4 @@ HEAD
 * Include basic_class_with_mqtt example into PatformIO examples
 * Include mqtt client setup for ESP32 target a WebConfigServer::begin method and enable mqtt loop only for ESP8266
 * Fix nested preprocessing directives
+* Add executable permissions to github Release action scripts
