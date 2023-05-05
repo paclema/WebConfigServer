@@ -11,4 +11,4 @@ HEAD
 * Replace WebConfigMQTT with MQTTClient and remove PubSubClient dependencies
 * Update basic example replacing PubSubClient with MQTTClient client and auto reconnect
 * Fix basic example to use littlefs instead spiffs
-* Fix basic example to use littlefs instead spiffs
+* Create basic_class_with_mqtt example to show a class using WebConfig configuration and MQTTClient observer callbacks and client
