@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.0.0 (2023-05-05)
+------
 
 * Added release github action workflow and necessary scripts
 * Add Release build badge on Readme
