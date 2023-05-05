@@ -37,7 +37,8 @@
       "/iot-button/topi1",
       "/iot-button/topi2",
       "/iot-button/topi3"
-    ]
+    ],
+    "task_stack_size": 7168
   },
   "services": {
     "OTA": {

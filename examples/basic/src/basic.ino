@@ -17,8 +17,8 @@ String getLoopTime(){ return String(currentLoopMillis - previousMainLoopMillis);
 String getRSSI(){ return String(WiFi.RSSI());}
 String getHeapFree(){ return String((float)GET_FREE_HEAP/1000);}
 
-#include <PubSubClient.h>
-PubSubClient * mainClientMqtt;
+#include <MQTTClient.h>
+MQTTClient *mqttClient;
 
 
 void callBeforeDeviceOff(){
@@ -37,7 +37,7 @@ void setup() {
 
   config.setPreSleepRoutine(callBeforeDeviceOff);
 
-  mainClientMqtt = config.getMQTTClient();
+  mqttClient = config.getMQTTClient();
 
   Serial.println("###  Looping time\n");
 
@@ -49,19 +49,12 @@ void loop() {
 
   config.loop();
 
-  // Reconnection loop:
-  // if (WiFi.status() != WL_CONNECTED) {
-  //   config.begin();
-  //   networkRestart();
-  //   config.configureServer(&server);
-  // }
-
   // Main Loop:
-  if( (currentLoopMillis - previousPublishMillis > 2000)) {
+  if( mqttClient->connected() && (currentLoopMillis - previousPublishMillis > 2000)) {
     previousPublishMillis = currentLoopMillis;
 
     String topic = config.getDeviceTopic() + "/test";
-    mainClientMqtt->publish(topic.c_str(),"Message from main loop");
+    mqttClient->publish(topic.c_str(),"Message from main loop");
 
   }
 
