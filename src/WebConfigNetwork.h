@@ -15,7 +15,7 @@
   #define PROTO_TCP 6
   #define PROTO_UDP 17
 
-  #if !IP_NAPT
+  #if !defined(IP_NAPT)
     #warning "IP_NAPT is not available with this configuration."
   #else
     #include "lwip/lwip_napt.h"
