@@ -7,6 +7,7 @@ HEAD
 * Fix ESP§" typo
 * Clean up preprocesor defines
 * Add default_4MB partition table for esp32 target examples
+* Replace framework-arduinoespressif32 with latest custom framework and change WebConfigServer @ ^2.0.1 to min version on examples
 
 v2.0.0 (2023-05-05)
 ------
