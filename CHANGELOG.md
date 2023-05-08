@@ -6,6 +6,7 @@ HEAD
 
 * Fix ESP§" typo
 * Clean up preprocesor defines
+* Add default_4MB partition table for esp32 target examples
 
 v2.0.0 (2023-05-05)
 ------
