@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.0.1 (2023-05-08)
+------
 
 * Fix ESP§" typo
 * Clean up preprocesor defines
