@@ -6,6 +6,7 @@ HEAD
 
 * Add WebConfigMQTT class and replace MQTTClient with it.
 * Fix getMQTTClient client pointer retrun and enable loop method only  for ESP8266 target
+* Bump MQTTClient to v0.0.6
 
 v2.0.1 (2023-05-08)
 ------
