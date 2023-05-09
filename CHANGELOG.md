@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.1.1 (2023-05-09)
+------
 
 * Fix save new mqtt client id into WebConfig when setMQTTClientId
 * Bump MQTTClient to v0.0.8
