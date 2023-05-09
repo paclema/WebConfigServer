@@ -14,8 +14,8 @@
     "enable_NAT": false
   },
   "mqtt": {
-    "enabled": false,
-    "reconnect_mqtt": false,
+    "enabled": true,
+    "reconnect_mqtt": true,
     "reconnect_retries": 10,
     "reconnect_time_ms": 10000,
     "server": "broker.ddns.net",

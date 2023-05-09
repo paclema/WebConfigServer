@@ -55,7 +55,8 @@ void loop() {
 
     String topic = config.getDeviceTopic() + "/test";
     mqttClient->publish(topic.c_str(),"Message from main loop");
-
+    
+    Serial.println("Message published");
   }
 
 previousMainLoopMillis = currentLoopMillis;
