@@ -23,7 +23,12 @@ public:
   void parseWebConfig(JsonObjectConst configObject) { mqttClient.setConfig(configObject); }
 
   MQTTClient * getMQTTClient(void) { return &mqttClient; };
-  void setMQTTClientId(std::string client_id) { mqttClient.setMQTTClientId(client_id); }
+  void setMQTTClientId(std::string client_id) {
+    mqttClient.setMQTTClientId(client_id);
+    StaticJsonDocument<192> docSave;
+    docSave["id_name"] = client_id;
+    IWebConfig::saveWebConfig(docSave.as<JsonObject>());
+  }
   std::string getBaseTopic(void) { return mqttClient.getBaseTopic(); }
 };
 
