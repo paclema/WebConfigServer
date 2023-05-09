@@ -52,6 +52,7 @@ typedef int8_t WebConfigStatus;
 // MQTT
 #ifndef DISABLE_WEBCONFIG_MQTT
 #include <MQTTClient.h>
+#include <WebConfigMQTT.h>
 
 #endif
 
@@ -128,7 +129,7 @@ public:
 
   WebConfigNetwork network;
 #ifndef DISABLE_WEBCONFIG_MQTT
-  MQTTClient mqtt;
+  WebConfigMQTT mqtt;
 #endif
 
   struct FTP {
@@ -211,8 +212,8 @@ public:
   void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
 
 #ifndef DISABLE_WEBCONFIG_MQTT
-  MQTTClient* getMQTTClient(void) { return &mqtt; }
-  void setMQTTClientId(String client_id) { mqtt.setMQTTClientId(std::string(client_id.c_str())); }
+  MQTTClient* getMQTTClient(void) { return mqtt.getMQTTClient(); }
+  void setMQTTClientId(std::string client_id) { mqtt.setMQTTClientId(client_id); }
   String getDeviceTopic(void) { return String(mqtt.getBaseTopic().c_str()); }
 #endif
 

@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Add WebConfigMQTT class and replace MQTTClient with it.
+
 v2.0.1 (2023-05-08)
 ------
 
