@@ -13,34 +13,18 @@ private:
   MQTTClient mqttClient;
 
 public:
-
-  MQTTClient * getMQTTClient(void) { return this->&mqttClient; };
   
-  void setup(void) {
-    Serial.printf("WebConfigMQTT::setup()\n");
-    mqttClient.setup();
-  }
+  void setup(void) { mqttClient.setup(); }
 
-  void loop(void) {
-    Serial.printf("WebConfigMQTT::loop()\n");
-    mqttClient.loop();
-  }
+  #ifdef ESP8266
+    void loop(void) { mqttClient.loop(); }
+  #endif
 
-  void parseWebConfig(JsonObjectConst configObject) {
-    Serial.printf("WebConfigMQTT::parseWebConfig()\n");
-    mqttClient.setConfig(configObject);
-  }
+  void parseWebConfig(JsonObjectConst configObject) { mqttClient.setConfig(configObject); }
 
-  void setMQTTClientId(std::string client_id) { 
-    Serial.printf("WebConfigMQTT::setMQTTClientId()\n");
-    mqttClient.setMQTTClientId(client_id); 
-  }
-
-  std::string getBaseTopic(void) { 
-    Serial.printf("WebConfigMQTT::getBaseTopic()\n");
-    return mqttClient.getBaseTopic(); 
-  }
-
+  MQTTClient * getMQTTClient(void) { return &mqttClient; };
+  void setMQTTClientId(std::string client_id) { mqttClient.setMQTTClientId(client_id); }
+  std::string getBaseTopic(void) { return mqttClient.getBaseTopic(); }
 };
 
-#endif
+#endif // WebConfigMQTT_H
