@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.1.0 (2023-05-09)
+------
 
 * Add WebConfigMQTT class and replace MQTTClient with it.
 * Fix getMQTTClient client pointer retrun and enable loop method only  for ESP8266 target
