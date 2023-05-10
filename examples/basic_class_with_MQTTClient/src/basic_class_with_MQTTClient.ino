@@ -1,5 +1,5 @@
-// basic_class_with_mqtt_WebConfigServer
-// -------------------------------------
+// basic_class_with_MQTTClient
+// ---------------------------
 //
 // This example shows how to use the MQTTClient to:
 // * Connect to an MQTT brocker

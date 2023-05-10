@@ -6,6 +6,7 @@ HEAD
 
 * Exclude .github folder for pio pkg
 * Update basic_class_with_mqtt to basic_class_with_MQTTClient
+* Update basic example and Bump MQTTClient to v0.1.1
 
 v2.1.1 (2023-05-09)
 ------

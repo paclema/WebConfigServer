@@ -46,8 +46,8 @@
     },
     "FTP": {
       "enabled": true,
-      "user": "paclema",
-      "password": "paclema"
+      "user": "ftpuser",
+      "password": "ftppwd"
     },
     "WebSockets": {
       "enabled": true,
