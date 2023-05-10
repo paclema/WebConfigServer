@@ -35,9 +35,10 @@ void MyClass::loop(void){
   currentMillis = millis();
   if( myClass_mqttClient->connected() && (currentMillis - lastPublishMillis > 1200)) {
     lastPublishMillis = currentMillis;
-
-    String topic = this->mqttBaseTopic + "/test";
+    
+    String topic = this->mqttBaseTopic + "MyClass";
     myClass_mqttClient->publish(topic.c_str(),"Message from MyClass loop");
+    Serial.printf("Message from MyClass loop published to topic %s\n", topic.c_str());
 
   }
 
