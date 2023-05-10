@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Exclude .github folder for pio pkg
+
 v2.1.1 (2023-05-09)
 ------
 

@@ -95,7 +95,8 @@
   ],
   "export": {
     "exclude": [
-        "docs"
+        "docs",
+        ".github"
         ]
     }
 }
