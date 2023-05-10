@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.2.0 (2023-05-10)
+------
 
 * Exclude .github folder for pio pkg
 * Update basic_class_with_mqtt to basic_class_with_MQTTClient

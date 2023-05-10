@@ -1,6 +1,6 @@
 # WebConfigServer
 [![Release Build](https://github.com/paclema/WebConfigServer/actions/workflows/release.yml/badge.svg)](https://github.com/paclema/WebConfigServer/actions/workflows/release.yml)
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/paclema/library/WebConfigServer.svg?version=2.1.1)](https://registry.platformio.org/libraries/paclema/WebConfigServer)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/paclema/library/WebConfigServer.svg?version=2.2.0)](https://registry.platformio.org/libraries/paclema/WebConfigServer)
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?color=yellow)](https://www.paypal.com/donate/?business=8PXZ598XDGAS2&no_recurring=0&currency_code=EUR&source=url)
 
