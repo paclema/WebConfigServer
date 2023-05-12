@@ -185,7 +185,7 @@ void WebConfigNetwork::restart(void){
   }
 
   // Enable NAPT:
-  #if ESP32 && IP_NAPT
+  #if defined(ESP32) && defined(IP_NAPT)
     if (enable_NAT){
       if (WiFi.isConnected() && APEnabled) {
         esp_err_t err = WebConfigNetwork::enableNAT();

@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Fix precompiler definition checks
+
 v2.2.0 (2023-05-10)
 ------
 
