@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.2.1 (2023-05-16)
+------
 
 * Fix precompiler definition checks
 * Fix compare_versions script checking the correct empty second argument
