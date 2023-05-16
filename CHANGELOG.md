@@ -5,6 +5,7 @@ HEAD
 ----
 
 * Fix precompiler definition checks
+* Fix compare_versions script checking the correct empty second argument
 
 v2.2.0 (2023-05-10)
 ------
