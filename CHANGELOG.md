@@ -5,6 +5,7 @@ HEAD
 ----
 
 * Fix log typo
+* Bump MQTTClient to v0.3.0
 
 v2.2.1 (2023-05-16)
 ------
