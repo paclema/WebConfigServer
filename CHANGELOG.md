@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Fix log typo
+
 v2.2.1 (2023-05-16)
 ------
 
