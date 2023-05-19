@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.2.2 (2023-05-19)
+------
 
 * Fix log typo
 * Bump MQTTClient to v0.3.0
