@@ -25,6 +25,16 @@ void WebConfigNetwork::WiFiEventHandler(void* arg, esp_event_base_t event_base, 
       ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
       log_i("[ipaddr][%s]", IPAddress(event->ip_info.ip.addr).toString().c_str());
       log_i("[ipaddr][%s]", WiFi.localIP().toString().c_str());
+
+      // Enable NAPT:
+      #if defined(ESP32) && defined(IP_NAPT)
+        if (self->enable_NAT){
+          esp_err_t err = self->enableNAT();
+          if (err == ESP_OK) Serial.println("NAT configured and enabled");
+          else Serial.printf("Error configuring NAT: %s\n", esp_err_to_name(err));
+        }
+      #endif
+
       if (self->networkObserver) {
           self->networkObserver->onNetworkConnected();
       }
