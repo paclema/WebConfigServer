@@ -225,18 +225,14 @@ void WebConfigServer::parseIWebConfig(const JsonDocument& doc){
   // Serial.println(configs.size());
 
   for (IWebConfig* config : configs) {
-    // config = configs.get(i);
-    config->parseWebConfig(doc[config->nameConfigObject].as<JsonVariantConst>());
-    // Serial.print("IWebConfig Object parsed for: ");
-    // Serial.println(config->nameConfigObject);
-
-
-    //TODO: check if nested config exists:
-    // if (config.containsKey(config->nameConfigObject)) {
-    //   JsonVariantConst nestedJson = root[config->nameConfigObject];
-    //   config->parseWebConfig(nestedJson);
-    // }
-
+    if (doc.containsKey(config->nameConfigObject)) {
+      config->parseWebConfig(doc[config->nameConfigObject].as<JsonVariantConst>());
+      // Serial.print("IWebConfig Object parsed for: ");
+      // Serial.println(config->nameConfigObject);
+    } else {
+      Serial.print("IWebConfig Object not found for: ");
+      Serial.println(config->nameConfigObject);
+    }
   }
 };
 
@@ -246,17 +242,14 @@ void WebConfigServer::parseIWebConfigService(const JsonDocument& doc){
   // Serial.println(configsServices.size());
 
   for (IWebConfig* config : configsServices) {
-    // config = configsServices.get(i);
-    config->parseWebConfig(doc["services"][config->nameConfigObject].as<JsonVariantConst>());
-    // Serial.print("IWebConfig Object parsed for: ");
-    // Serial.println(config->nameConfigObject);
-
-    //TODO: check if nested config exists:
-    // if (config.containsKey(config->nameConfigObject)) {
-    //   JsonVariantConst nestedJson = root[config->nameConfigObject];
-    //   config->parseWebConfig(nestedJson);
-    // }
-
+    if (doc["services"].containsKey(config->nameConfigObject)) {
+      config->parseWebConfig(doc["services"][config->nameConfigObject].as<JsonVariantConst>());
+      // Serial.print("IWebConfig Object parsed for: ");
+      // Serial.println(config->nameConfigObject);
+    } else {
+      Serial.print("IWebConfig Service Object not found for: ");
+      Serial.println(config->nameConfigObject);
+    }
   }
 };
 

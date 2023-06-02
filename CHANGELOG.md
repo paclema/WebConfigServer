@@ -8,6 +8,7 @@ HEAD
 * Replace LinkedList with std::vector. Fix issue #8
 * Replace ESPAsyncWebServer fork dependency
 * Replace const JsonDocument with JsonVariantConst for config parse methods
+* Check if config json contains IWebConfig object or service before parsing it
 
 v2.2.2 (2023-05-19)
 ------
