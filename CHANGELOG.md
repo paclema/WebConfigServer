@@ -7,6 +7,7 @@ HEAD
 * Fix reconfigure NAPT after IP_EVENT_STA_GOT_IP for esp32
 * Replace LinkedList with std::vector. Fix issue #8
 * Replace ESPAsyncWebServer fork dependency
+* Replace const JsonDocument with JsonVariantConst for config parse methods
 
 v2.2.2 (2023-05-19)
 ------

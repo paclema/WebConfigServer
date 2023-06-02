@@ -204,12 +204,7 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
 }
 
 
-// void WebConfigServer::addConfig(IWebConfig& config, String nameObject){
 void WebConfigServer::addConfig(IWebConfig* config, String nameObject){
-  // config.nameConfigObject = nameObject;
-  // configs.add(&config);
-  // Serial.print("IWebConfig Object added for: ");
-  // Serial.println(config.nameConfigObject);
   config->nameConfigObject = nameObject;
   configs.push_back(config);
   Serial.print("IWebConfig Object added for: ");
@@ -217,12 +212,7 @@ void WebConfigServer::addConfig(IWebConfig* config, String nameObject){
 };
 
 
-// void WebConfigServer::addConfigService(IWebConfig& config, String nameObject){
 void WebConfigServer::addConfigService(IWebConfig* config, String nameObject){
-  // config.nameConfigObject = nameObject;
-  // configsServices.add(&config);
-  // Serial.print("IWebConfig Object Service added for: ");
-  // Serial.println(config.nameConfigObject);
   config->nameConfigObject = nameObject;
   configsServices.push_back(config);
   Serial.print("IWebConfig Object Service added for: ");
@@ -234,13 +224,18 @@ void WebConfigServer::parseIWebConfig(const JsonDocument& doc){
   // Serial.print("List IWebConfig Objects size: ");
   // Serial.println(configs.size());
 
-  // IWebConfig *config ;
-  // for(int i = 0; i < configs.size(); i++){
   for (IWebConfig* config : configs) {
     // config = configs.get(i);
-    config->parseWebConfig(doc[config->nameConfigObject]);
+    config->parseWebConfig(doc[config->nameConfigObject].as<JsonVariantConst>());
     // Serial.print("IWebConfig Object parsed for: ");
     // Serial.println(config->nameConfigObject);
+
+
+    //TODO: check if nested config exists:
+    // if (config.containsKey(config->nameConfigObject)) {
+    //   JsonVariantConst nestedJson = root[config->nameConfigObject];
+    //   config->parseWebConfig(nestedJson);
+    // }
 
   }
 };
@@ -250,13 +245,17 @@ void WebConfigServer::parseIWebConfigService(const JsonDocument& doc){
   // Serial.print("List IWebConfig Objects size: ");
   // Serial.println(configsServices.size());
 
-  // IWebConfig *config ;
-  // for(int i = 0; i < configsServices.size(); i++){
   for (IWebConfig* config : configsServices) {
     // config = configsServices.get(i);
-    config->parseWebConfig(doc["services"][config->nameConfigObject]);
+    config->parseWebConfig(doc["services"][config->nameConfigObject].as<JsonVariantConst>());
     // Serial.print("IWebConfig Object parsed for: ");
     // Serial.println(config->nameConfigObject);
+
+    //TODO: check if nested config exists:
+    // if (config.containsKey(config->nameConfigObject)) {
+    //   JsonVariantConst nestedJson = root[config->nameConfigObject];
+    //   config->parseWebConfig(nestedJson);
+    // }
 
   }
 };
