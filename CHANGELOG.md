@@ -10,6 +10,7 @@ HEAD
 * Replace const JsonDocument with JsonVariantConst for config parse methods
 * Check if config json contains IWebConfig object or service before parsing it
 * Use ESPAsyncWebServer git repo as current version. Close issue #2
+* Update example using IWebConfig class as pointer or reference
 
 v2.2.2 (2023-05-19)
 ------

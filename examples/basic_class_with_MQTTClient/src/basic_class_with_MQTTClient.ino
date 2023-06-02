@@ -19,12 +19,13 @@
 #include "MyClass.h"
 // "MyClass" should be the same name as the object used into /data/config/config.json file
 // which represent the config objects configurable for this class.
-// This constructor can be clled specifying the name of the object into the config.json file
+// This constructor can be called specifying the name of the object into the config.json file
 // or the json object name can be provided later on, whenn adding the object into the config object
 // using config.addConfig(myClassObject, "MyClass");
 
-// MyClass *MyClass =  new MyClass("MyClass");
-MyClass myClassObject;
+MyClass myClassObject;      // --> in this case provide a reference of this object when adding the config object: config.addConfig(&myClassObject, "MyClass");
+// MyClass* myClassObject =  new MyClass("MyClass");   // --> in this case add the config object with the pointer: config.addConfig(myClassObject, "MyClass");
+// MyClass* myClassObject =  new MyClass();            // --> in this case add the config object with the pointer: config.addConfig(myClassObject, "MyClass");
 
 // WebConfigServer Configuration
 #include "WebConfigServer.h"
@@ -63,7 +64,7 @@ void setup() {
   // or updates that file. In that case, WebConfigServer will call the MyClass::parseWebConfig 
   // callback method, passing the new (nested, not the whole config.json) "MyClass" JsonObject 
   // with the new configurations.
-  config.addConfig(myClassObject, "MyClass");
+  config.addConfig(&myClassObject, "MyClass");
 
   config.begin();
   
