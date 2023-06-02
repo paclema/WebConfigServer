@@ -33,7 +33,7 @@
     {
       "name": "ESP Async WebServer",
       "owner": "me-no-dev",
-      "version": "^1.2.3",
+      "version": "https://github.com/me-no-dev/ESPAsyncWebServer",
       "platforms": ["espressif8266", "espressif32"]
     },
     {
