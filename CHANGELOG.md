@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.3.0 (2023-06-02)
+------
 
 * Fix reconfigure NAPT after IP_EVENT_STA_GOT_IP for esp32
 * Replace LinkedList with std::vector. Fix issue #8
