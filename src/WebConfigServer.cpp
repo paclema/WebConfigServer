@@ -15,12 +15,12 @@ WebConfigServer::WebConfigServer(void):
   #endif
 
   // Setup internal configs:
-  WebConfigServer::addConfig(network, "network");
+  WebConfigServer::addConfig(&network, "network");
   #ifndef DISABLE_WEBCONFIG_MQTT
-  WebConfigServer::addConfig(mqtt, "mqtt");
+  WebConfigServer::addConfig(&mqtt, "mqtt");
   #endif
-  WebConfigServer::addConfigService(services.ota, "OTA");
-  WebConfigServer::addConfigService(services.webSockets, "WebSockets");
+  WebConfigServer::addConfigService(&services.ota, "OTA");
+  WebConfigServer::addConfigService(&services.webSockets, "WebSockets");
 }
 
 
@@ -204,19 +204,29 @@ void WebConfigServer::parseConfig(const JsonDocument& doc){
 }
 
 
-void WebConfigServer::addConfig(IWebConfig& config, String nameObject){
-  config.nameConfigObject = nameObject;
-  configs.add(&config);
+// void WebConfigServer::addConfig(IWebConfig& config, String nameObject){
+void WebConfigServer::addConfig(IWebConfig* config, String nameObject){
+  // config.nameConfigObject = nameObject;
+  // configs.add(&config);
+  // Serial.print("IWebConfig Object added for: ");
+  // Serial.println(config.nameConfigObject);
+  config->nameConfigObject = nameObject;
+  configs.push_back(config);
   Serial.print("IWebConfig Object added for: ");
-  Serial.println(config.nameConfigObject);
+  Serial.println(config->nameConfigObject);
 };
 
 
-void WebConfigServer::addConfigService(IWebConfig& config, String nameObject){
-  config.nameConfigObject = nameObject;
-  configsServices.add(&config);
+// void WebConfigServer::addConfigService(IWebConfig& config, String nameObject){
+void WebConfigServer::addConfigService(IWebConfig* config, String nameObject){
+  // config.nameConfigObject = nameObject;
+  // configsServices.add(&config);
+  // Serial.print("IWebConfig Object Service added for: ");
+  // Serial.println(config.nameConfigObject);
+  config->nameConfigObject = nameObject;
+  configsServices.push_back(config);
   Serial.print("IWebConfig Object Service added for: ");
-  Serial.println(config.nameConfigObject);
+  Serial.println(config->nameConfigObject);
 };
 
 
@@ -224,9 +234,10 @@ void WebConfigServer::parseIWebConfig(const JsonDocument& doc){
   // Serial.print("List IWebConfig Objects size: ");
   // Serial.println(configs.size());
 
-  IWebConfig *config ;
-  for(int i = 0; i < configs.size(); i++){
-    config = configs.get(i);
+  // IWebConfig *config ;
+  // for(int i = 0; i < configs.size(); i++){
+  for (IWebConfig* config : configs) {
+    // config = configs.get(i);
     config->parseWebConfig(doc[config->nameConfigObject]);
     // Serial.print("IWebConfig Object parsed for: ");
     // Serial.println(config->nameConfigObject);
@@ -239,9 +250,10 @@ void WebConfigServer::parseIWebConfigService(const JsonDocument& doc){
   // Serial.print("List IWebConfig Objects size: ");
   // Serial.println(configsServices.size());
 
-  IWebConfig *config ;
-  for(int i = 0; i < configsServices.size(); i++){
-    config = configsServices.get(i);
+  // IWebConfig *config ;
+  // for(int i = 0; i < configsServices.size(); i++){
+  for (IWebConfig* config : configsServices) {
+    // config = configsServices.get(i);
     config->parseWebConfig(doc["services"][config->nameConfigObject]);
     // Serial.print("IWebConfig Object parsed for: ");
     // Serial.println(config->nameConfigObject);

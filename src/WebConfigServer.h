@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #include <string.h>
+#include <vector>
 
 // To enable asyc webserver use platformio build_flags = -D USE_ASYNC_WEBSERVER
 // Or define here and in main.cpp:
@@ -40,12 +41,6 @@ typedef int8_t WebConfigStatus;
 
 #define ARDUINOJSON_ENABLE_ALIGNMENT 1
 
-
-#include <LinkedList.h>
-// Using AsyncWebServer LinkedList lib can not be used because there is a class
-// using the same name. For that reason, for now we use SimpleList until we fix
-// this using namespace for example. Check PR: https://github.com/me-no-dev/ESPAsyncWebServer/pull/1029
-// #include <SimpleList.h>
 #include "IWebConfig.h"
 
 
@@ -208,7 +203,7 @@ public:
 
   WebConfigStatus status(void) { return config_status;};
 
-  void addConfig(IWebConfig& config, String nameObject);
+  void addConfig(IWebConfig* config, String nameObject);
   void addDashboardObject(String key, String (*valueFunction)()) { services.webSockets.addObjectToPublish(key, valueFunction);}
 
 #ifndef DISABLE_WEBCONFIG_MQTT
@@ -254,11 +249,8 @@ public:
   };
 
 private:
-
-  LinkedList<IWebConfig*> configs = LinkedList<IWebConfig*>();
-  LinkedList<IWebConfig*> configsServices = LinkedList<IWebConfig*>();
-  // SimpleList<IWebConfig*> configs = SimpleList<IWebConfig*>();
-  // SimpleList<IWebConfig*> configsServices = SimpleList<IWebConfig*>();
+  std::vector<IWebConfig*> configs;
+  std::vector<IWebConfig*> configsServices;
 
   #ifdef USE_ASYNC_WEBSERVER
     AsyncWebServer * server;
@@ -279,7 +271,7 @@ private:
 
   void configureServer(void);
 
-  void addConfigService(IWebConfig& config, String nameObject);
+  void addConfigService(IWebConfig* config, String nameObject);
   void parseIWebConfig(const JsonDocument& doc);
   void parseIWebConfigService(const JsonDocument& doc);
 

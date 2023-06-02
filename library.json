@@ -54,16 +54,6 @@
       "platforms": ["espressif8266", "espressif32"]
     },
     {
-      "name": "LinkedList",
-      "version": "https://github.com/ivanseidel/LinkedList.git#v1.3.2",
-      "platforms": "*"
-    },
-    {
-      "name": "SimpleList",
-      "version": "https://github.com/spacehuhn/SimpleList",
-      "platforms": ["espressif8266", "espressif32"]
-    },
-    {
       "name": "FTP",
       "owner": "dplasa",
       "version": "https://github.com/dplasa/FTPClientServer",
