@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Trigger WiFi reconnect on IP_EVENT_STA_LOST_IP event
+
 v2.3.0 (2023-06-02)
 ------
 

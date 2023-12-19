@@ -40,6 +40,11 @@ void WebConfigNetwork::WiFiEventHandler(void* arg, esp_event_base_t event_base, 
       }
       break;
       }
+    case IP_EVENT_STA_LOST_IP:{
+      log_e("WIFI STA LOST IP");
+      WiFi.reconnect();
+      break;
+      }
     case WIFI_EVENT_STA_DISCONNECTED:{
       log_i("WIFI DISCONNECTED ");
       ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
