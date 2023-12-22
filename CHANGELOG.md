@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v2.3.2 (2023-12-22)
+------
 
 * Fix GPIO state change when LED_BUILTIN is not defined or -1
 
