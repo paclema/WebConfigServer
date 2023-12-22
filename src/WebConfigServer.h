@@ -41,6 +41,10 @@ typedef int8_t WebConfigStatus;
 
 #define ARDUINOJSON_ENABLE_ALIGNMENT 1
 
+#ifndef LED_BUILTIN
+  #define LED_BUILTIN -1
+#endif
+
 #include "IWebConfig.h"
 
 

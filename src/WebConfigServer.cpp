@@ -512,30 +512,18 @@ void WebConfigServer::updateGpio(AsyncWebServerRequest *request){
   #endif
 
 
-    // Reverse current LED status:
+  // Reverse current LED status:
+  String response = "{\"message\":\"GPIO " + String(gpio);
+  if(pin != -1 ){
     pinMode(pin, OUTPUT);
-    // digitalWrite(pin, LOW);
-    digitalWrite(pin, !digitalRead(pin));
-
-    // if ( val == "true" ) {
-    //   digitalWrite(pin, HIGH);
-    // } else if ( val == "false" ) {
-    //   digitalWrite(pin, LOW);
-    // } else {
-    //   success = "true";
-    //   Serial.println("Err parsing GPIO Value");
-    // }
-
-    // String response = "{\"gpio\":\"" + String(gpio) + "\",";
-    // response += "\"val\":\"" + String(val) + "\",";
-    // response += "\"success\":\"" + String(success) + "\"}";
-
-    String response = "{\"message\":\"GPIO " + String(gpio);
     response += " changed to " + String(!digitalRead(pin)) + "\"}";
+  } else {
+    log_e("GPIO state can not be changed for the requested pin numer: %d ", pin);
+    response += " can not be changed\"}";
+  }
 
-    request->send(200, "text/json", response);
-    Serial.println("JSON POST /gpio : " + response);
-
+  request->send(200, "text/json", response);
+  Serial.println("JSON POST /gpio : " + response);
 }
 
 void WebConfigServer::configureServer(){
@@ -809,32 +797,17 @@ void WebConfigServer::updateGpio(WebServer *server){
     }
 
   // Reverse current LED status:
-  pinMode(pin, OUTPUT);
-  // digitalWrite(pin, LOW);
-  Serial.println(pin);
-  Serial.print("Current status:");
-  Serial.println(digitalRead(pin));
-  digitalWrite(pin, !digitalRead(pin));
-
-
-  // if ( val == "true" ) {
-  //   digitalWrite(pin, HIGH);
-  // } else if ( val == "false" ) {
-  //   digitalWrite(pin, LOW);
-  // } else {
-  //   success = "true";
-  //   Serial.println("Err parsing GPIO Value");
-  // }
-
-  // String json = "{\"gpio\":\"" + String(gpio) + "\",";
-  // json += "\"val\":\"" + String(val) + "\",";
-  // json += "\"success\":\"" + String(success) + "\"}";
-
-  String json = "{\"message\":\"GPIO " + String(gpio);
-  json += " changed to " + String(!digitalRead(pin)) + "\"}";
-
-  server->send(200, "application/json", json);
-  Serial.println("GPIO updated!");
+  String response = "{\"message\":\"GPIO " + String(gpio);
+  if(pin != -1 ){
+    pinMode(pin, OUTPUT);
+    response += " changed to " + String(!digitalRead(pin)) + "\"}";
+  } else {
+    log_e("GPIO state can not be changed for the requested pin numer: %d ", pin);
+    response += " can not be changed\"}";
+  }
+  
+  server->send(200, "application/json", response);
+  Serial.println("JSON POST /gpio : " + response);
 
 }
 
@@ -1067,33 +1040,19 @@ void WebConfigServer::updateGpio(ESP8266WebServer *server){
 
     }
 
+
   // Reverse current LED status:
-  pinMode(pin, OUTPUT);
-  // digitalWrite(pin, LOW);
-  Serial.println(pin);
-  Serial.print("Current status:");
-  Serial.println(digitalRead(pin));
-  digitalWrite(pin, !digitalRead(pin));
-
-
-  // if ( val == "true" ) {
-  //   digitalWrite(pin, HIGH);
-  // } else if ( val == "false" ) {
-  //   digitalWrite(pin, LOW);
-  // } else {
-  //   success = "true";
-  //   Serial.println("Err parsing GPIO Value");
-  // }
-
-  // String json = "{\"gpio\":\"" + String(gpio) + "\",";
-  // json += "\"val\":\"" + String(val) + "\",";
-  // json += "\"success\":\"" + String(success) + "\"}";
-
-  String json = "{\"message\":\"GPIO " + String(gpio);
-  json += " changed to " + String(!digitalRead(pin)) + "\"}";
-
-  server->send(200, "application/json", json);
-  Serial.println("GPIO updated!");
+  String response = "{\"message\":\"GPIO " + String(gpio);
+  if(pin != -1 ){
+    pinMode(pin, OUTPUT);
+    response += " changed to " + String(!digitalRead(pin)) + "\"}";
+  } else {
+    log_e("GPIO state can not be changed for the requested pin numer: %d ", pin);
+    response += " can not be changed\"}";
+  }
+  
+  server->send(200, "application/json", response);
+  Serial.println("JSON POST /gpio : " + response);
 
 }
 
