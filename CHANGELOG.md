@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Fix release workflow replacing checkout to v4 and adding default GITHUB_TOKEN
+
 v3.0.0 (2025-08-14)
 ------
 
