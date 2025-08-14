@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Bump MQTTClient to v1.0.0
+
 v2.3.2 (2023-12-22)
 ------
 
