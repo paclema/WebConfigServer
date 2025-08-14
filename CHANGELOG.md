@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Fix deprecated GPIO_ID_PIN macro
+
 v3.0.1 (2025-08-14)
 ------
 
