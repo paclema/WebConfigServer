@@ -669,7 +669,7 @@ void WebConfigServer::configureServer(){
     int params = request->params();
     Serial.printf(" \n/uploadFile Request parameters: %d\n", params);
     for(int i=0;i<params;i++){
-      AsyncWebParameter* p = request->getParam(i);
+      const AsyncWebParameter* p = request->getParam(i);
       if(p->isFile()){ //p->isPost() is also true
         Serial.printf("FILE[%s]: %s, size: %u\n", p->name().c_str(), p->value().c_str(), p->size());
       } else if(p->isPost()){

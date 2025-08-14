@@ -5,6 +5,7 @@ HEAD
 ----
 
 * Fix deprecated GPIO_ID_PIN macro
+* Fix AsyncWebParameter pointer to const in /uploadFile method
 
 v3.0.1 (2025-08-14)
 ------
