@@ -780,13 +780,13 @@ void WebConfigServer::updateGpio(WebServer *server){
   String val = server->arg("val");
   String success = "1";
 
-  int pin = GPIO_ID_PIN(5);
+  int pin = 5;
   if ( gpio == "D5" ) {
-    pin = GPIO_ID_PIN(5);
+    pin = 5;
   } else if ( gpio == "D7" ) {
-     pin = GPIO_ID_PIN(7);
+     pin = 7;
    } else if ( gpio == "D8" ) {
-     pin = GPIO_ID_PIN(8);
+     pin = 8;
    } else if ( gpio == "LED_BUILTIN" ) {
      pin = LED_BUILTIN;
    } else {
