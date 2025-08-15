@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v3.1.0 (2025-08-15)
+------
 
 * Fix deprecated GPIO_ID_PIN macro
 * Fix AsyncWebParameter pointer to const in /uploadFile method
