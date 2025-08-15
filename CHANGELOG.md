@@ -7,6 +7,7 @@ HEAD
 * Fix deprecated GPIO_ID_PIN macro
 * Fix AsyncWebParameter pointer to const in /uploadFile method
 * Fix deprecated GPIO_ID_PIN macro when not USE_ASYNC_WEBSERVER
+* Refactor NAT configuration in enableNAT method using arduino-esp32 AP and NAPT methods instead ESP-IDF API
 
 v3.0.1 (2025-08-14)
 ------

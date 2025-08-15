@@ -222,38 +222,69 @@ void WebConfigNetwork::restart(void){
 esp_err_t WebConfigNetwork::enableNAT(void){
 
   // Give DNS servers to AP side:
-  esp_err_t err;
-  tcpip_adapter_dns_info_t ip_dns_main;
-  tcpip_adapter_dns_info_t ip_dns_backup;
+  // esp_err_t err;
+  // tcpip_adapter_dns_info_t ip_dns_main;
+  // tcpip_adapter_dns_info_t ip_dns_backup;
 
 
-  err = tcpip_adapter_dhcps_stop(TCPIP_ADAPTER_IF_AP); if (err != ESP_OK) return err;
+  // err = tcpip_adapter_dhcps_stop(TCPIP_ADAPTER_IF_AP); if (err != ESP_OK) return err;
 
-  err = tcpip_adapter_get_dns_info(TCPIP_ADAPTER_IF_STA, ESP_NETIF_DNS_MAIN, &ip_dns_main); if (err != ESP_OK) return err;
-  err = tcpip_adapter_get_dns_info(TCPIP_ADAPTER_IF_STA, ESP_NETIF_DNS_BACKUP, &ip_dns_backup); if (err != ESP_OK) return err;
+  // err = tcpip_adapter_get_dns_info(TCPIP_ADAPTER_IF_STA, ESP_NETIF_DNS_MAIN, &ip_dns_main); if (err != ESP_OK) return err;
+  // err = tcpip_adapter_get_dns_info(TCPIP_ADAPTER_IF_STA, ESP_NETIF_DNS_BACKUP, &ip_dns_backup); if (err != ESP_OK) return err;
 
-  err = tcpip_adapter_set_dns_info(TCPIP_ADAPTER_IF_AP, ESP_NETIF_DNS_MAIN, &ip_dns_main); if (err != ESP_OK) return err;
-  // Serial.printf("\ntcpip_adapter_set_dns_info ESP_NETIF_DNS_MAIN: err %s . ip_dns:" IPSTR, esp_err_to_name(err), IP2STR(&ip_dns_main.ip.u_addr.ip4)) ;
+  // err = tcpip_adapter_set_dns_info(TCPIP_ADAPTER_IF_AP, ESP_NETIF_DNS_MAIN, &ip_dns_main); if (err != ESP_OK) return err;
+  // // Serial.printf("\ntcpip_adapter_set_dns_info ESP_NETIF_DNS_MAIN: err %s . ip_dns:" IPSTR, esp_err_to_name(err), IP2STR(&ip_dns_main.ip.u_addr.ip4)) ;
 
-  dhcps_offer_t opt_val = OFFER_DNS; // supply a dns server via dhcps
-  tcpip_adapter_dhcps_option(ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &opt_val, 1);
+  // dhcps_offer_t opt_val = OFFER_DNS; // supply a dns server via dhcps
+  // tcpip_adapter_dhcps_option(ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &opt_val, 1);
 
-  err = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP); if (err != ESP_OK) return err;
+  // err = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP); if (err != ESP_OK) return err;
 
 
   // Enable NAT:
-  ip_napt_enable(WiFi.softAPIP(), 1);
+  // ip_napt_enable(WiFi.softAPIP(), 1);
+  
+  // // Example port mapping to stations:
+  // // Mapping Webserver: (of an sta connected to this ap)
+  // IPAddress ap_ip = WiFi.localIP();
+  // ip_portmap_add(PROTO_TCP,ap_ip, 8080,IPAddress(192, 168, 4, 2), 80 );
+  // ip_portmap_add(PROTO_UDP,ap_ip, 8080,IPAddress(192, 168, 4, 2), 80 );
+  // // Mapping WebSockets:
+  // ip_portmap_add(PROTO_TCP,ap_ip, 94,IPAddress(192, 168, 4, 2), 94 );
+  // ip_portmap_add(PROTO_UDP,ap_ip, 94,IPAddress(192, 168, 4, 2), 94 );
+  
+  // return err;
+  
+  // Arduino NEW method:
+  // Use configured AP IP, subnet, and calculate lease start and DNS from WebConfigServer Network configurationa
+  IPAddress ap_ip;
+  IPAddress ap_mask;
+  IPAddress ap_leaseStart;
+  IPAddress ap_dns;
 
-  // Example port mapping to stations:
-  // Mapping Webserver: (of an sta connected to this ap)
-  IPAddress ap_ip = WiFi.localIP();
-  ip_portmap_add(PROTO_TCP,ap_ip, 8080,IPAddress(192, 168, 4, 2), 80 );
-  ip_portmap_add(PROTO_UDP,ap_ip, 8080,IPAddress(192, 168, 4, 2), 80 );
-  // Mapping WebSockets:
-  ip_portmap_add(PROTO_TCP,ap_ip, 94,IPAddress(192, 168, 4, 2), 94 );
-  ip_portmap_add(PROTO_UDP,ap_ip, 94,IPAddress(192, 168, 4, 2), 94 );
+  ap_ip.fromString(this->ip_address);
+  ap_mask.fromString(this->subnet);
+  ap_dns.fromString(this->dns_server);
 
-  return err;
+  // Calculate lease start: first usable IP in subnet (e.g., ap_ip + 1)
+  ap_leaseStart = ap_ip;
+  ap_leaseStart[3] = ap_ip[3] + 1;
+
+  if (!WiFi.AP.begin()) return ESP_FAIL;
+  if (!WiFi.AP.config(ap_ip, ap_ip, ap_mask, ap_leaseStart, ap_dns)) return ESP_FAIL;
+  if (!WiFi.AP.create(ap_name.c_str(), ap_password.c_str())) return ESP_FAIL;
+
+  // Wait for AP to start
+  // if (!WiFi.AP.waitStatusBits(ESP_NETIF_STARTED_BIT, 1000)) {
+  //   Serial.println("Failed to start AP!");
+  //   ESP_LOGE("WebConfigNetwork", "Failed to start AP!");
+  //   return ESP_FAIL;
+  // }
+
+  if (!WiFi.AP.enableNAPT(true)) return ESP_FAIL;
+  
+  ESP_LOGI("WebConfigNetwork", "NAT enabled");
+  return ESP_OK;
 }
 
 void WebConfigNetwork::handleAPStations(void){
