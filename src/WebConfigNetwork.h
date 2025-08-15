@@ -8,6 +8,7 @@
 #ifdef ESP32
   #include <WiFi.h>
   #include "esp_wifi.h"
+  #include "esp_wifi_ap_get_sta_list.h"
   #include <esp_event.h>
   #include <WiFiMulti.h>
   #include <ESPmDNS.h>

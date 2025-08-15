@@ -9,6 +9,7 @@ HEAD
 * Fix deprecated GPIO_ID_PIN macro when not USE_ASYNC_WEBSERVER
 * Refactor NAT configuration in enableNAT method using arduino-esp32 AP and NAPT methods instead ESP-IDF API
 * Update AP Stations info on WIFI_EVENT_STA_START events
+* Fix deprecated tcpip_adapter methods with ESP-NETIF API on handleAPStations method
 
 v3.0.1 (2025-08-14)
 ------

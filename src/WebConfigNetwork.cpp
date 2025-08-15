@@ -289,23 +289,25 @@ esp_err_t WebConfigNetwork::enableNAT(void){
 }
 
 void WebConfigNetwork::handleAPStations(void){
-  AP_clients = WiFi.softAPgetStationNum();
-
-  Serial.printf("Stations connected to AP: %d\n", AP_clients);
-
   wifi_sta_list_t wifi_sta_list;
-  tcpip_adapter_sta_list_t adapter_sta_list;
-
   memset(&wifi_sta_list, 0, sizeof(wifi_sta_list));
-  memset(&adapter_sta_list, 0, sizeof(adapter_sta_list));
-
   esp_wifi_ap_get_sta_list(&wifi_sta_list);
-  tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list);
+  ESP_LOGI("WebConfigNetwork", "Stations connected to AP: %d", wifi_sta_list.num);
+  
+  wifi_sta_mac_ip_list_t wifi_sta_ip_mac_list;
+  memset(&wifi_sta_ip_mac_list, 0, sizeof(wifi_sta_ip_mac_list));
+  esp_err_t err = esp_wifi_ap_get_sta_list_with_ip(&wifi_sta_list, &wifi_sta_ip_mac_list);
 
-  char wifiClientMac[18];
-  for (int clientNum = 0; clientNum < adapter_sta_list.num; clientNum++) {
-    tcpip_adapter_sta_info_t station = adapter_sta_list.sta[clientNum];
-    Serial.printf("\t - Station %d MAC: " MACSTR " IP: " IPSTR "\n", clientNum, MAC2STR(station.mac), IP2STR(&station.ip));
+  if (err == ESP_OK) {
+    for (int clientNum = 0; clientNum < wifi_sta_ip_mac_list.num; clientNum++) {
+      ESP_LOGD("WebConfigNetwork", "AP Client %d MAC: " MACSTR " IP: " IPSTR,
+          clientNum + 1,
+          MAC2STR(wifi_sta_ip_mac_list.sta[clientNum].mac),
+          IP2STR(&wifi_sta_ip_mac_list.sta[clientNum].ip)
+      );
+    }
+  } else {
+    ESP_LOGE("WebConfigNetwork", "Error getting station MAC/IP list: %s", esp_err_to_name(err));
   }
   
   updateApStations = false;
