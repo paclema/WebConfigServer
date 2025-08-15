@@ -56,6 +56,7 @@ void WebConfigNetwork::WiFiEventHandler(void* arg, esp_event_base_t event_base, 
       break;
       }
     case WIFI_EVENT_AP_STADISCONNECTED:
+    case WIFI_EVENT_STA_START:
     case WIFI_EVENT_AP_STACONNECTED: {
       log_i("AP client updates");
       self->updateApStations = true;
