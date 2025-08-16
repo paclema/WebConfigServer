@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Replace deprecated me-no-dev ESP Async libs with ESP32Async org libs
+
 v3.1.0 (2025-08-15)
 ------
 

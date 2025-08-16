@@ -284,7 +284,7 @@ esp_err_t WebConfigNetwork::enableNAT(void){
 
   if (!WiFi.AP.enableNAPT(true)) return ESP_FAIL;
   
-  ESP_LOGI("WebConfigNetwork", "NAT enabled");
+  ESP_LOGI("WebConfigNetwork", "NAPT enabled");
   return ESP_OK;
 }
 
