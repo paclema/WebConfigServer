@@ -1,8 +1,8 @@
 WebConfigServer: Changelog
 ==========================
 
-HEAD
-----
+v3.2.1 (2025-08-18)
+------
 
 * Fix recursive LittleFS file listing function for ESP32
 * Fix compare_versions.sh script to handle empty and zero versions correctly
