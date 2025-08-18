@@ -312,6 +312,10 @@ private:
 
 
   String getContentType(String filename);
+  
+  #if defined(ESP32)
+    void listFilesRecursive(fs::FS &fs, const char * dirname);
+  #endif
 
   // WebConfigNetworkObserver
   void onNetworkConnected() {

@@ -1,6 +1,11 @@
 WebConfigServer: Changelog
 ==========================
 
+HEAD
+----
+
+* Fix recursive LittleFS file listing function for ESP32
+
 v3.2.0 (2025-08-16)
 ------
 

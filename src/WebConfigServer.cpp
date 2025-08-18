@@ -24,6 +24,22 @@ WebConfigServer::WebConfigServer(void):
 }
 
 
+#ifdef ESP32
+void WebConfigServer::listFilesRecursive(fs::FS &fs, const char * dirname) {
+  File root = fs.open(dirname);
+  if (!root) return;
+  File file = root.openNextFile();
+  while (file) {
+    if (file.isDirectory()) {
+      listFilesRecursive(fs, file.path());
+    } else {
+      Serial.printf("FS File: %s, size: %s\n", file.path(), formatBytes(file.size()).c_str());
+    }
+    file = root.openNextFile();
+  }
+}
+#endif
+
 bool WebConfigServer::initWebConfigs(void){
 
   #ifdef ESP32
@@ -34,14 +50,7 @@ bool WebConfigServer::initWebConfigs(void){
   } else {
     Serial.println("LittleFS Mount succesfull");
     WebConfigServer::updateSizeLittleFS(true);
-    File root = LittleFS.open("/");
-    File file = root.openNextFile();
-    while (file) {
-      String fileName = file.name();
-      size_t fileSize = file.size();
-      Serial.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
-      file = root.openNextFile();
-    }
+    listFilesRecursive(LittleFS, "/");
     if (LittleFS.exists(CONFIG_FILE)) {
       Serial.println(); Serial.print(CONFIG_FILE); Serial.println(" exists!");
       loadConfigurationFile(CONFIG_FILE);
