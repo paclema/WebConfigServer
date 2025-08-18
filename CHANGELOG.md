@@ -5,6 +5,7 @@ HEAD
 ----
 
 * Fix recursive LittleFS file listing function for ESP32
+* Fix compare_versions.sh script to handle empty and zero versions correctly
 
 v3.2.0 (2025-08-16)
 ------
